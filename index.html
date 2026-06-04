@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulado de Certificações SAP — Dexterity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ow:#F7F3E7;--gf:#4D4D4D;--ce:#009994;--rx:#98569A;--am:#FFA436;--mg:#597C59;--err:#C0504A;--line:#e7e0cf;--mut:#8a8478;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ow);color:var(--gf);font-family:'Mulish','Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.ttl{font-family:'Saira Condensed','Oswald','Arial Narrow',sans-serif;letter-spacing:.4px;text-transform:uppercase}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 20px 72px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px}
+.soft{box-shadow:0 1px 2px rgba(77,77,77,.06),0 8px 24px rgba(77,77,77,.05)}
+.btn{cursor:pointer;border:none;border-radius:10px;font-weight:700;font-size:14px;font-family:inherit;transition:filter .15s,transform .08s;padding:11px 18px}
+.btn:hover{filter:brightness(1.05)} .btn:active{transform:translateY(1px)}
+.btn-pri{background:var(--ce);color:#fff} .btn-acc{background:var(--am);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--gf)}
+.btn-danger{background:#fff;border:1px solid #f0d6d4;color:var(--err)}
+.btn:disabled{background:#cdd6d5;color:#fff;cursor:default;filter:none}
+.row{display:flex;align-items:center} .between{justify-content:space-between} .gap{gap:10px} .wrapf{flex-wrap:wrap}
+.grid{display:grid;gap:14px}
+.kpi{padding:16px} .kpi .lab{font-size:12.5px;font-weight:600;color:var(--mut)} .kpi .val{font-size:30px;margin-top:6px} 
+.chip{cursor:pointer;border-radius:999px;font-weight:600;font-size:13px;padding:8px 14px;border:1.5px solid var(--line);background:#fff;color:var(--gf);font-family:inherit}
+.chip.on{color:#fff}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;color:#fff;padding:4px 10px;border-radius:999px}
+.nav{background:#fff;border-bottom:1px solid var(--line)}
+.navin{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.navbtn{cursor:pointer;border:none;background:transparent;border-radius:10px;font-weight:600;font-size:14px;padding:8px 14px;color:var(--gf);font-family:inherit}
+.navbtn.on{background:var(--ce);color:#fff}
+.opt{display:flex;align-items:flex-start;gap:12px;text-align:left;padding:13px 15px;border-radius:12px;border:1.5px solid var(--line);background:#fff;cursor:pointer;width:100%;font-family:inherit;font-size:14.5px;line-height:1.45;color:var(--gf);transition:all .12s}
+.optl{flex-shrink:0;width:26px;height:26px;border-radius:7px;background:#efe9da;display:flex;align-items:center;justify-content:center;font-size:14px}
+.in{padding:11px 13px;border-radius:10px;border:1px solid #ddd5c2;font-size:15px;font-family:inherit;outline:none;background:#fff;color:var(--gf)}
+.sec{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:10px}
+.modal{position:fixed;inset:0;background:rgba(77,77,77,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+a.dl{color:var(--ce);font-weight:700;text-decoration:none}
+.barbg{height:8px;background:#efe9da;border-radius:999px;overflow:hidden}
+.muted{color:var(--mut)} .small{font-size:12px}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+var C={ow:'#F7F3E7',gf:'#4D4D4D',ce:'#009994',rx:'#98569A',am:'#FFA436',mg:'#597C59',err:'#C0504A'};
+var CATS_CACT = {
+  agile:      { label: 'Ágil e Scrum',              color: C.ce },
+  phases:     { label: 'Fases do Activate',          color: C.rx },
+  fts:        { label: 'Fit-to-Standard',            color: C.am },
+  transition: { label: 'Caminhos de Transição',      color: C.mg },
+  cloud:      { label: 'Edições Cloud e Deploy',     color: '#2F8F8C' },
+  tools:      { label: 'Ferramentas e Aceleradores', color: '#7A4480' },
+  testing:    { label: 'Testes',                      color: '#C77F2E' },
+  ext:        { label: 'Extensibilidade e Código',    color: '#46663F' },
+  method:     { label: 'Metodologia e Governança',    color: '#5C5C5C' },
+};;
+var CATS_TRM={
+  tm:{label:'Transaction Manager',color:C.ce},
+  hedge:{label:'Hedge Mgmt & Accounting',color:C.rx},
+  mra:{label:'Market Risk Analyzer',color:C.am},
+  cra:{label:'Credit Risk Analyzer',color:'#C77F2E'},
+  cash:{label:'Cash & Liquidity',color:C.mg},
+  bank:{label:'Bancos & Pagamentos',color:'#2F8F8C'},
+  bp:{label:'Business Partner',color:'#7A4480'},
+  cfin:{label:'Central Finance',color:'#5C5C5C'},
+  gen:{label:'S/4HANA & Geral',color:'#46663F'}
+};
+var Q_CACT = [
+  { id:1, cat:'agile', q:'Which estimation technique can you use in an Agile delivery approach to size the user stories during sprint planning?',
+    o:{A:'Detailed top-down effort estimate by the Scrum Master in story points, based on the user story complexity',B:'Relative effort estimate in Ideal Person Days that reflects the best estimate by the Project Team',C:"Product Owner's relative effort estimate that will be needed to implement and test the user story",D:'Detailed bottom-up effort estimate by the Product Owner that breaks up each story into short tasks'}, a:['A'],
+    e:'A estimativa em story points (top-down) avalia tamanho e complexidade relativos, gerando estimativas por consenso.'},
+  { id:2, cat:'agile', q:'What activity do you perform during the daily stand-up meeting?',
+    o:{A:'Refine acceptance criteria for the sprint.',B:'Re-baseline the release plan.',C:'Demo completed features.',D:'Report showstoppers.'}, a:['D'],
+    e:'A daily foca em alinhamento do time, reportando impedimentos (showstoppers) que travam o progresso.'},
+  { id:3, cat:'fts', q:'Which of the following steps are part of the fit-to-standard process?',
+    o:{A:'Document integration requirements',B:'Enable customers on standard business processes',C:'Review Best Practices process flow',D:'Design to-be business process models'}, a:['B','C'],
+    e:'O fit-to-standard inclui capacitar o cliente nos processos padrão e revisar os fluxos das Best Practices.'},
+  { id:4, cat:'fts', q:'What accelerator can help you document the configuration definition in the Explore phase?',
+    o:{A:'Change request template',B:'Test plan template',C:'Data definition template',D:'Backlog template'}, a:['D'],
+    e:'O Backlog template documenta e rastreia as configurações e requisitos identificados nos workshops do Explore.'},
+  { id:5, cat:'tools', q:'Which of the following tools can support you in managing requirements and software development for implementation projects?',
+    o:{A:'SAP Focused Run',B:'Focused Build for SAP Solution Manager',C:'SAP Cloud ALM',D:'Focused Insights for SAP Solution Manager'}, a:['B','C'],
+    e:'Focused Build e SAP Cloud ALM gerenciam requisitos e o desenvolvimento de software em projetos de implementação.'},
+  { id:6, cat:'tools', q:'Which collaboration features are available in the SAP Community?',
+    o:{A:'Ask questions',B:'Comment on Key Deliverables',C:'Update Key Deliverable wikis',D:'Follow community'}, a:['A','D'],
+    e:'Na SAP Community é possível fazer perguntas e seguir tópicos/comunidades.'},
+  { id:7, cat:'cloud', q:"Which of the following is the customer's responsibility in both on-premise and private cloud scenarios?",
+    o:{A:'Database',B:'Operating system',C:'Middleware',D:'Servers'}, a:['D'],
+    e:'Em on-premise e private cloud, a manutenção dos servidores (físicos ou virtuais) é responsabilidade do cliente.'},
+  { id:8, cat:'phases', q:"In which phase do you verify the SAP Best Practices content that meets the customer's business needs, and capture delta requirements?",
+    o:{A:'Discovery',B:'Explore',C:'Prepare',D:'Realize'}, a:['B'],
+    e:'No Explore o conteúdo das Best Practices é validado e os requisitos delta são capturados.'},
+  { id:9, cat:'ext', q:'What does the Side-by-Side extensibility option mean?',
+    o:{A:'SAP S/4HANA extensions are context-aware and focused on tight integration.',B:'There are two SAP S/4HANA instances: one for standard code and another for custom developments.',C:'Extend SAP S/4HANA using APIs published on SAP Business Accelerator Hub.',D:'Extending SAP S/4HANA using SAP ABAP Development Workbench.'}, a:['C'],
+    e:'Side-by-Side estende o S/4HANA via APIs e serviços no SAP Business Accelerator Hub, desacoplando customizações do core.'},
+  { id:10, cat:'method', q:'Which of the following are levels in the structure of an SAP Best Practices for SAP S/4HANA Solution Package?',
+    o:{A:'Scope Items',B:'Business Process Scenarios',C:'Configuration Guides',D:'Building Blocks'}, a:['A','D'],
+    e:'Scope Items e Building Blocks são níveis estruturais do Solution Package.'},
+  { id:11, cat:'method', q:'In which workstream do you execute an organizational change impact analysis?',
+    o:{A:'Application Design and Configuration',B:'Solution Adoption',C:'Analytics',D:'Project Management'}, a:['B'],
+    e:'A análise de impacto da mudança organizacional ocorre na workstream Solution Adoption.'},
+  { id:12, cat:'method', q:'What is the most granular level of the methodology you can view in the SAP Roadmap Viewer?',
+    o:{A:'Task',B:'Workstream',C:'Deliverable',D:'Activities'}, a:['A'],
+    e:'No Roadmap Viewer, Task é o nível mais detalhado e granular.'},
+  { id:13, cat:'agile', q:'What is the objective of using scaling Scrum techniques when coordinating large teams in complex projects?',
+    o:{A:'To reallocate staff to skill-based teams such as developers in one single team.',B:'To bring all specialists, such as the company legal advisors, into the Scrum team.',C:'To manage the flow of information between the project and stakeholders.',D:'To ensure alignment in architecture, configuration, and integration.'}, a:['D'],
+    e:'Técnicas como Scrum of Scrums garantem alinhamento de arquitetura, configuração e integração entre times.'},
+  { id:14, cat:'tools', q:'What tool would you use for managing project tasks and Solution Documentation when implementing SAP S/4HANA Cloud, public edition?',
+    o:{A:'SAP Cloud ALM',B:'SAP Signavio Process Navigator',C:'SAP Roadmap Viewer',D:'SAP Transformation Navigator'}, a:['A'],
+    e:'SAP Cloud ALM gerencia tarefas e a Solution Documentation no S/4HANA Cloud, public edition.'},
+  { id:15, cat:'phases', q:'What is one of the key activities performed towards the end of the Explore phase?',
+    o:{A:'Setup of Solution Standardization Board',B:'Operations Planning for operational readiness',C:'Installation and setup of Sandbox system',D:'Perform configuration settings in the system'}, a:['A'],
+    e:'Ao fim do Explore configura-se o Solution Standardization Board para governança e consistência.'},
+  { id:16, cat:'method', q:'Comparing the SAP Activate methodology with Waterfall, what activities are performed by the new project roles?',
+    o:{A:'Product owner to discuss schedule with the customer',B:'Scrum master to prepare the project plan',C:'Scrum master and project sponsor to define the project charter',D:'Scrum team to review best practices'}, a:['D'],
+    e:'Em abordagens ágeis, o Scrum team revisa e aplica as best practices; os times são auto-organizados.'},
+  { id:17, cat:'fts', q:'Which activity helps the project team identify and add user stories to the backlog?',
+    o:{A:'Assessing documentation requirements',B:'Benchmarking current business processes',C:'Planning the release and sprints',D:'Conducting the fit-to-standard workshop'}, a:['D'],
+    e:'O workshop de fit-to-standard identifica gaps e requisitos, convertidos em user stories no backlog.'},
+  { id:18, cat:'agile', q:'Who determines the tasks that are required to complete the committed backlog items in a Sprint?',
+    o:{A:'Project manager',B:'Scrum master',C:'Scrum team',D:'Product owner'}, a:['C'],
+    e:'O Scrum team se auto-organiza para definir as tarefas necessárias aos itens do backlog.'},
+  { id:19, cat:'agile', q:'What information does the project team need before they can correctly estimate the relative size of backlog user stories?',
+    o:{A:'Available project resources',B:'Definition of Ready',C:'Definition of Done',D:'Benchmark user story'}, a:['B','C'],
+    e:'Definition of Ready e Definition of Done estabelecem critérios claros para estimar com precisão.'},
+  { id:20, cat:'agile', q:'How do you set up Scrum teams?',
+    o:{A:'As a cross-functional team covering multiple functions, like configuration, data loads, and testing.',B:'By type of work, like configuration Scrum, documentation Scrum, and testing Scrum.',C:'Based on group size, but a minimum of 12 people.',D:'Based on end-to-end processes like order-to-cash.'}, a:['A','D'],
+    e:'Times Scrum são cross-functional ou organizados por processos ponta-a-ponta (ex.: order-to-cash).'},
+  { id:21, cat:'agile', q:'When does the Scrum team receive formal confirmation that the user stories are completed to the satisfaction of the product owner?',
+    o:{A:'During the sprint review',B:'During the sprint retrospective',C:'During the sprint backlog review',D:'During the sprint user acceptance test'}, a:['A'],
+    e:'No sprint review o time demonstra as stories e o product owner confirma os critérios de aceite.'},
+  { id:22, cat:'tools', q:'Which of the following tools are considered enablers for digital transformation?',
+    o:{A:'SAP Product Availability Matrix',B:'SAP Roadmap Viewer',C:'Software Logistics Toolset',D:'SAP Activate Community',E:'SAP Signavio Process Navigator'}, a:['B','D','E'],
+    e:'Roadmap Viewer, Activate Community e Signavio Process Navigator apoiam a transformação digital.'},
+  { id:23, cat:'phases', q:'You are transitioning to SAP S/4HANA. In which phase do you adjust custom code?',
+    o:{A:'Realize',B:'Deploy',C:'Explore',D:'Prepare'}, a:['A'],
+    e:'O ajuste de código customizado ocorre no Realize, junto com configuração e desenvolvimento.'},
+  { id:24, cat:'cloud', q:'What is the difference between the "New Implementation of SAP S/4HANA Cloud, public edition" and the "New Implementation of SAP S/4HANA, private edition" transition paths?',
+    o:{A:'Private edition uses the Implementation Guide (IMG), and public edition uses SAP Central Business Configuration.',B:'Private edition is only available through SAP Cloud services and with embedded implementation services from SAP.',C:'Public edition does NOT offer built-in capabilities for extensibility, while private edition offers a full development environment.',D:'Upgrades of public edition are based on SAP timelines, and upgrades of private edition are based on timelines agreed upon between SAP and the customer.'}, a:['A','D'],
+    e:'Public usa CBC e upgrades pela SAP; private usa IMG e upgrades em cronograma acordado.'},
+  { id:25, cat:'fts', q:'Which of the following is part of the Explore phase in the "New Implementation of SAP S/4HANA Cloud, public edition" transition path?',
+    o:{A:'Request SAP S/4HANA Cloud Development System',B:'Solution Validation and Delta Design',C:'Develop and document Enablement Strategy',D:'Fit-to-standard'}, a:['D'],
+    e:'O workshop de fit-to-standard é parte central do Explore no public edition.'},
+  { id:26, cat:'agile', q:'What do you do during the sprint retrospective meeting?',
+    o:{A:'Define sprint activities and best practices with the customer.',B:'Plan future sprints with the customer.',C:'Discuss best practices with the Scrum Team.',D:'Document best practices guided by the Scrum Master.'}, a:['D'],
+    e:'Na retrospectiva, guiada pelo Scrum Master, documentam-se best practices e lições aprendidas.'},
+  { id:27, cat:'fts', q:'What findings do you document in the Explore Phase Fit-to-standard workshops?',
+    o:{A:'Detailed design of extensions',B:'Process models',C:'Key business decisions',D:'Key user documentation',E:'Confirmation of scope'}, a:['B','C','E'],
+    e:'Documentam-se process models, key business decisions e confirmação de escopo.'},
+  { id:28, cat:'tools', q:'When performing an SAP Readiness Check in system conversion, what areas are covered within the result?',
+    o:{A:'Active business functions',B:'Recommended SAP Fiori apps',C:'SAP and third-party interfaces',D:'Sizing for SAP S/4HANA',E:'Complete list of possible simplification items'}, a:['A','B','E'],
+    e:'O Readiness Check cobre business functions ativas, apps Fiori recomendados e simplification items.'},
+  { id:29, cat:'phases', q:'When conducting an upgrade of an SAP S/4HANA Cloud, public edition three-system landscape, in which phase are the Business Roles updated?',
+    o:{A:'Explore',B:'Deploy',C:'Discover',D:'Realize'}, a:['D'],
+    e:'No Realize as Business Roles são atualizadas para a solução upgrade.'},
+  { id:30, cat:'transition', q:'What are the two common approaches to Selective Data Transition adopting RISE with SAP?',
+    o:{A:'System Conversion',B:'Shell Conversion',C:'Mix and Match',D:'Fit-to-Standard'}, a:['B','C'],
+    e:'Shell Conversion (footprint mínimo) e Mix and Match (seleção flexível) são as abordagens de SDT.'},
+  { id:31, cat:'cloud', q:'Which of the following is used to perform configuration in SAP S/4HANA Cloud, private edition?',
+    o:{A:'SAP Central Business Configuration',B:'Self Service Configuration UIs (SSCUIs)',C:'IMG (Implementation Guide)',D:'SAP Solution Manager'}, a:['C'],
+    e:'No private edition a configuração é feita principalmente pelo IMG.'},
+  { id:32, cat:'tools', q:'Which additional scope options does the strategic advisory service for cloud analytics offer?',
+    o:{A:'SAP S/4HANA for Central Finance',B:'Baseline package',C:'SAP Activate methodology for SAP Datasphere',D:'Extended package'}, a:['B','D'],
+    e:'O serviço oferece os pacotes Baseline e Extended.'},
+  { id:33, cat:'method', q:'When applying a cloud mindset in a greenfield implementation, which of the following should you consider?',
+    o:{A:'Use supported extensibility technologies',B:'Use quality gates',C:'Ensure transparency on deviations',D:'Use SAP Digital Discovery Assessment'}, a:['A','C'],
+    e:'Usar tecnologias de extensibilidade suportadas e garantir transparência sobre desvios.'},
+  { id:34, cat:'method', q:'Which of the following are levels in the structure of an SAP Best Practices for SAP S/4HANA Solution Package?',
+    o:{A:'Business Process Scenarios',B:'Building Blocks',C:'Scope Items',D:'Configuration Guides'}, a:['B','C'],
+    e:'Scope Items e Building Blocks compõem a estrutura do Solution Package.'},
+  { id:35, cat:'agile', q:'What is the purpose of the scrum board?',
+    o:{A:'To show readiness of the release',B:'To visualize the resource load',C:'To visualize team progress',D:'To document the results of the fit-to-standard workshop'}, a:['C'],
+    e:'O scrum board visualiza o progresso do time nas tarefas do sprint.'},
+  { id:36, cat:'agile', q:'According to the Definition of Done, which activity must be completed for each Sprint?',
+    o:{A:'Configuration must be transported to the production system.',B:'Functionality must be released to the business.',C:'Refinement of user story description must be completed.',D:'The solution must be built and configured in the development system.'}, a:['D'],
+    e:'A DoD exige que a solução esteja construída e configurada no ambiente de desenvolvimento.'},
+  { id:37, cat:'transition', q:'Your customer is using a non-SAP ERP system and decides to deploy SAP S/4HANA. Which of the following options are available to your customer?',
+    o:{A:'System Conversion SAP S/4HANA',B:'New Implementation SAP S/4HANA Cloud, private edition',C:'New Implementation SAP S/4HANA',D:'System Conversion SAP S/4HANA Cloud, private edition',E:'New Implementation SAP S/4HANA Cloud, public edition'}, a:['B','C','E'],
+    e:'Vindo de ERP não-SAP, apenas caminhos de New Implementation se aplicam.'},
+  { id:38, cat:'method', q:'Which of the following considerations apply when determining the project methodology?',
+    o:{A:'Readiness fit',B:'Organizational fit',C:'Integration fit',D:'Project fit',E:'Project Manager fit'}, a:['B','C','D'],
+    e:'Organizational fit, integration fit e project fit orientam a escolha da metodologia.'},
+  { id:39, cat:'cloud', q:'Which system tenant is the first to be provisioned when implementing SAP S/4HANA Cloud, public edition?',
+    o:{A:'SAP Cloud Identity Services',B:'SAP S/4HANA Cloud Sandbox system',C:'SAP S/4HANA Cloud Development system',D:'Central Business Configuration system'}, a:['D'],
+    e:'O Central Business Configuration system é o primeiro tenant provisionado.'},
+  { id:40, cat:'transition', q:'A customer with an existing SAP S/4HANA solution is exploring the best approach to move without changing their landscape into the cloud. Which is the most suitable option for the customer?',
+    o:{A:'Selective Data Transition',B:'System Conversion',C:'Mix and Match',D:'Lift and Shift'}, a:['D'],
+    e:'Lift and Shift move o sistema existente para a cloud com mínima alteração no landscape.'},
+  { id:41, cat:'phases', q:'In which phase will the customer develop a preliminary strategy for building a target Operations and Support organizational model?',
+    o:{A:'Prepare',B:'Explore',C:'Discover',D:'Realize'}, a:['A'],
+    e:'No Prepare desenvolve-se a estratégia preliminar de Operations and Support.'},
+  { id:42, cat:'agile', q:'What technique helps a Scrum team to prioritize a large, flat backlog?',
+    o:{A:'Splitting the backlog into epics',B:'MOSCOW prioritization',C:'A/B testing user stories',D:'User story mapping'}, a:['A','D'],
+    e:'Dividir em epics e user story mapping organizam e clareiam a priorização.'},
+  { id:43, cat:'fts', q:'Which steps should you perform while preparing for a fit-to-standard analysis in an SAP Data Warehouse Cloud project?',
+    o:{A:'Review SAP S/4HANA Cloud best practices availability for your country.',B:'Review Cutover Plan accelerator in the Data Management workstream.',C:'Review all the necessary Implementation Design Principles (IDPs).',D:'Review all the necessary leading practice process diagrams.'}, a:['C','D'],
+    e:'Revisar os IDPs e os leading practice process diagrams alinha o design às boas práticas.'},
+  { id:44, cat:'agile', q:'What criteria does the Scrum team use to sequence the product backlog?',
+    o:{A:'Length of the sprint',B:'Business priority',C:'Experience of team members',D:'Technical dependencies'}, a:['B','D'],
+    e:'Prioridade de negócio e dependências técnicas ordenam o backlog.'},
+  { id:45, cat:'cloud', q:'For which of the following products do you find a specific set of SAP Best Practices for the public sector?',
+    o:{A:'SAP S/4HANA',B:'SAP SuccessFactors Employee Central',C:'SAP S/4HANA Cloud, public edition',D:'SAP Ariba Supplier Management'}, a:['C'],
+    e:'O S/4HANA Cloud, public edition possui Best Practices específicas para o setor público.'},
+  { id:46, cat:'agile', q:'Which of the following is a key characteristic of the Agile project approach?',
+    o:{A:'Higher business involvement in the early phases',B:'Frequent and detailed release scheduling',C:'Iterative build with frequent inspections',D:'Frequent quality gates in each sprint'}, a:['C'],
+    e:'A construção iterativa com inspeções frequentes é característica central do Agile.'},
+  { id:47, cat:'transition', q:'What is the preferred option to migrate to SAP S/4HANA Cloud, private edition while keeping most of the original processes and adding new configuration?',
+    o:{A:'Mix and Match',B:'System Conversion',C:'Shell Conversion',D:'New Implementation'}, a:['C'],
+    e:'Shell Conversion traz a maioria dos processos originais e permite nova configuração.'},
+  { id:48, cat:'agile', q:'What are the responsibilities of the product owner in release and sprint planning?',
+    o:{A:'Estimate the backlog user stories.',B:'Define objectives for each release.',C:'Analyze the functional and technical dependencies between user stories.',D:'Prioritize backlog user stories by business priority.'}, a:['B','D'],
+    e:'O PO define objetivos de release e prioriza o backlog por prioridade de negócio.'},
+  { id:49, cat:'fts', q:'Which accelerators support the fit-to-standard workshop in the Explore phase?',
+    o:{A:'Quality gate checklist and quality gate guide',B:'Business-Driven Configuration questionnaire',C:'Test plan document',D:'Requirements feature in SAP Cloud ALM'}, a:['B','D'],
+    e:'O questionário Business-Driven Configuration e a feature Requirements do Cloud ALM apoiam o workshop.'},
+  { id:50, cat:'tools', q:'Which of the following cloud services are available on SAP Business Technology Platform?',
+    o:{A:'SAP Integration Suite',B:'SAP HANA Cloud',C:'SAP Cloud ALM',D:'SAP Data Migration Cockpit',E:'SAP Master Data Governance'}, a:['A','B','E'],
+    e:'Integration Suite, HANA Cloud e Master Data Governance estão na BTP.'},
+  { id:51, cat:'ext', q:'Which of the following tools facilitate secure communication between SAP cloud solutions and protected on-premise networks that CANNOT be accessed directly from the Internet?',
+    o:{A:'Identity Authentication service',B:'SAP Build Code',C:'SAP BTP Connectivity service',D:'Cloud Integration Automation service'}, a:['C'],
+    e:'O BTP Connectivity service conecta soluções cloud a redes on-premise isoladas com segurança.'},
+  { id:52, cat:'cloud', q:'Which systems are part of the private cloud edition landscape?',
+    o:{A:'Starter',B:'Sandbox',C:'Evaluation',D:'Production'}, a:['B','D'],
+    e:'Sandbox e Production compõem o landscape do private cloud edition.'},
+  { id:53, cat:'tools', q:'Which of the following Accelerators can you find in the SAP Signavio Process Navigator?',
+    o:{A:'Process Diagram',B:'Data Migration plan',C:'Test Script',D:'Stakeholder Identification Guide'}, a:['A','C'],
+    e:'O Signavio Process Navigator oferece Process Diagrams e Test Scripts.'},
+  { id:54, cat:'cloud', q:'Which of the following characteristics are mandatory with SAP S/4HANA Cloud, public edition?',
+    o:{A:'Software upgrades performed by SAP',B:'Customer data center deployment',C:'Activation of SAP Best Practices',D:'Choice of hardware vendor'}, a:['A','C'],
+    e:'Upgrades pela SAP e ativação das SAP Best Practices são obrigatórios no public edition.'},
+  { id:55, cat:'agile', q:'What is Scrum of Scrums?',
+    o:{A:'Inspection of code and configuration prior to sprint demo',B:'Integration meeting among the various Scrum teams',C:'Scrum team led by very experienced Scrum master',D:'Alternative to regular Scrum process for a very large team'}, a:['B'],
+    e:'Scrum of Scrums é a reunião de integração entre os diversos times Scrum.'},
+  { id:56, cat:'transition', q:'Which of the following are capabilities of SAP Landscape Transformation Tool used in Selective Data Transition scenarios?',
+    o:{A:'Migration of selected applications',B:'Migration of business units',C:'Configuration of open backlog items',D:'Consolidation of systems',E:'Full set of historical transactional data'}, a:['A','B','D'],
+    e:'O SAP LT migra aplicações e business units selecionados e consolida sistemas.'},
+  { id:57, cat:'phases', q:'What is the correct phase order of an SAP Activate project?',
+    o:{A:'Prepare > Explore > Discover > Realize > Deploy',B:'Prepare > Discover > Explore > Realize > Deploy > Run',C:'Prepare > Explore > Realize > Deploy > Run',D:'Prepare > Explore > Realize > Deploy > Run'}, a:['C'],
+    e:'A ordem é Prepare > Explore > Realize > Deploy > Run.'},
+  { id:58, cat:'tools', q:'Which SAP products relate to the scenarios included in the SAP Activate roadmap for the Intelligent Enterprise?',
+    o:{A:'SAP Fieldglass',B:'SAP Integrated Business Planning for Supply Chain',C:'SAP S/4HANA Cloud',D:'SAP Concur',E:'SAP Sales Cloud'}, a:['A','C','D'],
+    e:'Fieldglass, S/4HANA Cloud e Concur fazem parte do roadmap do Intelligent Enterprise.'},
+  { id:59, cat:'testing', q:'Which of the following are capabilities of the test automation tool for SAP S/4HANA Cloud, public edition?',
+    o:{A:'Raises test defect tickets automatically',B:'Supports the creation of custom test automates',C:'Supports recording of SAP GUI-based processes',D:'Captures test results with screenshots'}, a:['B','D'],
+    e:'A ferramenta cria automações de teste customizadas e captura resultados com screenshots.'},
+  { id:60, cat:'transition', q:'What is the difference between the System Conversion and New Implementation transition paths to SAP S/4HANA?',
+    o:{A:'Custom code is developed in System Conversion and adjusted in New Implementation in the Realize phase.',B:'Custom code is adjusted in System Conversion and developed in New Implementation in the Realize phase.',C:'Data is converted in System Conversion and migrated in New Implementation in the Realize phase.',D:'Data is migrated in System Conversion and converted in New Implementation in the Realize phase.'}, a:['B','C'],
+    e:'No System Conversion o código é ajustado e os dados convertidos; na New Implementation o código é desenvolvido e os dados migrados.'},
+  { id:61, cat:'agile', q:'When working with an Agile approach, what is the minimum planning requirement expected at the beginning of the Realize phase?',
+    o:{A:'Sprint planning and sprint durations should be defined for the first 2 to 3 sprints.',B:'Realize phase scope, planning, and budget should be completed and final.',C:'User stories on the product backlog should be in a ready state for the first 2 to 3 sprints.',D:'Release plan and sprint ceremony guidelines should be finalized.'}, a:['A'],
+    e:'No início do Realize basta planejar sprints e durações para os primeiros 2 a 3 sprints.'},
+  { id:62, cat:'method', q:'Which of the following are SAP Activate workstreams?',
+    o:{A:'Data Migration',B:'Extensibility',C:'Change Management',D:'Project Management'}, a:['A','D'],
+    e:'Data Migration e Project Management são workstreams do SAP Activate.'},
+  { id:63, cat:'agile', q:'What criteria does the product owner use to sequence the backlog?',
+    o:{A:'Technical dependencies',B:'Duration of the sprint',C:'Complexity of the story',D:'Business priority'}, a:['A','D'],
+    e:'O PO ordena por prioridade de negócio e dependências técnicas.'},
+  { id:64, cat:'phases', q:'In which phase do you collect the main functional attributes of the product as per the Agile definition?',
+    o:{A:'Discover',B:'Prepare',C:'Explore',D:'Realize'}, a:['C'],
+    e:'No Explore capturam-se os principais atributos funcionais, via user stories e workshops.'},
+  { id:65, cat:'cloud', q:'Which tool do you use to configure SAP S/4HANA Cloud, public edition?',
+    o:{A:'SAP Central Business Configuration',B:'IMG (Implementation Guide)',C:'SAP Solution Manager',D:'SAP Cloud ALM'}, a:['A'],
+    e:'O SAP Central Business Configuration é a ferramenta de configuração do public edition.'},
+  { id:66, cat:'testing', q:'Which of the following capabilities does test management in SAP Cloud ALM for Implementation provide?',
+    o:{A:'Manual and Automated Testing',B:'Load and Volume Testing',C:'Test Plans',D:'Test Data Container'}, a:['A','C'],
+    e:'O Cloud ALM oferece testes manuais e automatizados e Test Plans.'},
+  { id:67, cat:'method', q:'What is the primary purpose of the SAP Activate methodology?',
+    o:{A:'To provide end-to-end application lifecycle management',B:'To enable access to the SAP ecosystem',C:'To expedite all deployments of SAP products',D:'To manage project documentation'}, a:['A'],
+    e:'O SAP Activate provê gestão de ciclo de vida ponta-a-ponta das aplicações SAP.'},
+  { id:68, cat:'phases', q:'Which of the following activities take place during the Discover phase in an SAP BW/4HANA implementation?',
+    o:{A:'Create, review, and sign off the Project Charter.',B:'Discuss the benefits and functionality of SAP Analytics Cloud.',C:'Create, review, and sign off the Project Management Plan.',D:'Discuss the benefits of SAP Data Warehouse Cloud.'}, a:['B','D'],
+    e:'No Discover discutem-se benefícios do SAP Analytics Cloud e do SAP Data Warehouse Cloud.'},
+  { id:69, cat:'testing', q:'Which of the following best outlines the sequence of testing in the Realize phase?',
+    o:{A:'Data Migration > String Test > User Acceptance Test',B:'String Test > Integration Test > User Acceptance Test',C:'String Test > User Acceptance Test > Integration Test',D:'Integration Test > User Acceptance Test > String Test'}, a:['B'],
+    e:'A sequência é String Test, Integration Test e User Acceptance Test.'},
+  { id:70, cat:'transition', q:'A customer with an existing SAP S/4HANA solution is exploring the best approach to move without changing their landscape into the cloud. Which is the most suitable option for the customer?',
+    o:{A:'Selective Data Transition',B:'System Conversion',C:'Lift and Shift',D:'Mix and Match'}, a:['C'],
+    e:'Lift and Shift relocaliza a infraestrutura sem transformar o sistema.'},
+  { id:71, cat:'tools', q:'Which functionality is available in Focused Build?',
+    o:{A:'Integration Monitoring',B:'User Experience Monitoring',C:'Test Management',D:'Custom Code Management'}, a:['C'],
+    e:'O Focused Build inclui Test Management abrangente.'},
+  { id:72, cat:'tools', q:'What tool provides sizing estimations for the "System Conversion" transition path?',
+    o:{A:'SAP Business Accelerator Hub',B:'SAP Transformation Navigator',C:'SAP Readiness Check',D:'SAP Digital Discovery Assessment'}, a:['C'],
+    e:'O SAP Readiness Check fornece estimativas de sizing para o System Conversion.'},
+  { id:73, cat:'ext', q:'When deploying SAP S/4HANA Cloud, private edition using new implementation, which of the following is recommended to code custom developments?',
+    o:{A:'SAP Support Portal',B:'SAP Business Technology Platform',C:'SAP ABAP Workbench',D:'SAP Best Practices'}, a:['B','C'],
+    e:'BTP (side-by-side) e ABAP Workbench (in-app) são recomendados para custom developments.'},
+  { id:74, cat:'fts', q:'Which of the following are workshop design principles/guidelines?',
+    o:{A:'Expert configuration definitions',B:'Fit-to-standard',C:'Active participation',D:'Validation by end users'}, a:['B','C'],
+    e:'Fit-to-standard e participação ativa são princípios dos workshops.'},
+  { id:75, cat:'tools', q:'From which platform are you able to deploy a trial system within a short timeframe?',
+    o:{A:'SAP Learning Hub',B:'SAP Cloud Appliance Library',C:'SAP Support Portal',D:'SAP Business Technology Platform'}, a:['B'],
+    e:'A SAP Cloud Appliance Library permite implantar sistemas trial rapidamente.'},
+  { id:76, cat:'cloud', q:'You are implementing SAP S/4HANA Cloud, public edition for your customer. How do you activate the pre-configuration?',
+    o:{A:'Via the SAP Contact Center',B:'Via the SAP Business Technology Platform',C:'Via the Central Business Configuration System',D:'Via the SAP Cloud ALM'}, a:['C'],
+    e:'A pré-configuração é ativada pelo Central Business Configuration System.'},
+  { id:77, cat:'fts', q:'In which workshop do you validate SAP standard functionality and collect delta requirements?',
+    o:{A:'Solution design',B:'Fit-to-standard',C:'Fit-to-gap',D:'Solution assessment'}, a:['B'],
+    e:'No workshop fit-to-standard valida-se o padrão e coletam-se requisitos delta.'},
+  { id:78, cat:'tools', q:'Which of the following characteristics relate to the Focused Build for SAP Solution Manager Functionality?',
+    o:{A:'SAP delivers a standard solution without any additional coding required.',B:'SAP delivers a standard solution with its own separate license.',C:'SAP delivers all configuration values within your project.',D:'SAP delivers all knowledge required with the solution.'}, a:['A','D'],
+    e:'O Focused Build é solução padronizada, sem coding adicional e com todo o conhecimento necessário.'},
+  { id:79, cat:'tools', q:'What can you find in the SAP Fiori apps reference library?',
+    o:{A:'Shortcut to the Maintenance Planner tool to establish the technical update path',B:'Related app recommendations based on your usage profile',C:'Shortcut to the Quicksizer tool to estimate hardware requirements',D:'Installation and configuration requirements for selected apps',E:'Related app-specific solution design guidelines'}, a:['B','D','E'],
+    e:'A biblioteca oferece recomendações de apps, requisitos de instalação/config e diretrizes de solution design.'},
+  { id:80, cat:'testing', q:'What would you include in a Scope of Integration test?',
+    o:{A:'The procedures for data migration',B:'The connectivity between database and application servers',C:'The functionality of end-to-end business processes',D:'The connectivity with other systems'}, a:['C','D'],
+    e:'O Integration test cobre processos ponta-a-ponta e a conectividade com outros sistemas.'},
+  { id:81, cat:'tools', q:'In which of the following do you use a work item in Focused Build?',
+    o:{A:'Epics',B:'Sprints',C:'Waves',D:'Releases'}, a:['B'],
+    e:'No Focused Build os work items são gerenciados dentro de Sprints.'},
+  { id:82, cat:'cloud', q:'When doing a new implementation on premise or private cloud, which system is recommended to demonstrate standard functionality in the Explore phase?',
+    o:{A:'Development',B:'Starter',C:'Trial',D:'Sandbox'}, a:['D'],
+    e:'O Sandbox é recomendado no Explore para demonstrar a funcionalidade padrão.'},
+];;
+var Q_TRM=[
+{id:1,cat:"cfin",q:"What are used during the extraction and posting of data in the initial load of FI/CO postings, which is carried out via Customizing of Central Finance.?",o:{A:"Package keys",B:"Link to change Requests",C:"Monitor Service Desk",D:"Implement SAP services"},a:["C"]},
+{id:2,cat:"bp",q:"Which item is maintained in the standing instructions of a business partners counterparty role?",o:{A:"Credit standing",B:"Derived flows",C:"Bank details",D:"Trading partner"},a:["B"]},
+{id:3,cat:"hedge",q:"Which of the rule specifies how the hedged item and the hedging instruments are valuated before designation?",o:{A:"SAP Ariba Cloud Integration",B:"Payment method",C:"Platform support",D:"Hedge accounting rule"},a:["D"]},
+{id:4,cat:"bp",q:"At which levels are authorizations assigned in the business partner standing instructions?",o:{A:"Product category",B:"Flow type",C:"Product type",D:"Business partner category",E:"Transaction type"},a:["A", "C", "E"]},
+{id:5,cat:"hedge",q:"What is evaluated to ensure proper calculation of the reclassification amounts and the relevant hedging relationship is classified and posted on the reclassification date?",o:{A:"Financial Transaction",B:"Visibility of Spend",C:"Maverick Spend",D:"Spend on Catalog"},a:["A"]},
+{id:6,cat:"hedge",q:"Which of the report is relevant if you start with the Hedge Management and Accounting of Net Open Exposures process and need to initialize existing hedging relationships?",o:{A:"Customer projects",B:"Initialize Hedging Relationships report",C:"Statistical authorities",D:"Direct cost projects"},a:["B"]},
+{id:7,cat:"mra",q:"Which of the positions are integrated in market risk analyzer of treasury and risk management?",o:{A:"Exposure positions",B:"Sourcing",C:"Contracts",D:"Reporting"},a:["A"]},
+{id:8,cat:"gen",q:"Where you can also configure for which master data (business partner, customer, vendor) the company code is created?",o:{A:"In the detail view",B:"Software Update Manager (SUM)",C:"Desktop File Sync (DFS) is NOT activated.",D:"It must be a PDF document."},a:["A"]},
+{id:9,cat:"bank",q:"Your current payment outflows meet all netting requirements. Which Transaction Manager flows can you link through netting?",o:{A:"Two or more money market transaction flows",B:"Two money market flows and a foreign exchange flow",C:"One money market flow and a freeform payment request",D:"Bank-to-bank repetitive payment and a money market flow",E:"Five derivative flows and one security flow"},a:["A", "B", "E"]},
+{id:10,cat:"bank",q:"Which of the following configurations are shared between Accounts payable and Treasury payment programs?",o:{A:"Paying company codes",B:"Origin indicators",C:"Payment request clearing account",D:"Payment methods"},a:["A", "D"]},
+{id:11,cat:"hedge",q:"What can be used to split the valuation results determined into effective and ineffective portions?",o:{A:"Classification",B:"ASN and Quality",C:"Inventory Collaboration",D:"Consignment"},a:["A"]},
+{id:12,cat:"gen",q:"Which of the following accrual and deferral methods are supported?",o:{A:"Difference",B:"Reversed",C:"Partial",D:"Reset"},a:["A", "D"]},
+{id:13,cat:"hedge",q:"Which of the values are derived from the exposure position data in Exposure Management 2.0?",o:{A:"PO & Non PO Invoices",B:"Active Compliance",C:"ManuaI order",D:"Characteristic values"},a:["D"]},
+{id:14,cat:"bank",q:"Which of the logic is based on repayment flows that contain the payment date, payment amount and currency?",o:{A:"Standalone agreement",B:"Sub agreement",C:"Dual-stack split tool",D:"Calculation logic"},a:["D"]},
+{id:15,cat:"hedge",q:"What is created with the hedging relationship on the end date of the exposure subitem?",o:{A:"SAP BW administrator",B:"Internal",C:"Target groups",D:"Update Type Open"},a:["D"]},
+{id:16,cat:"bp",q:"Which of the code column appears in the payment details for a transaction and in the standing instructions?",o:{A:"Recurring and fixed costs",B:"Need for more detailed analysis of resource utilization",C:"Complexity",D:"Repetitive Code column"},a:["D"]},
+{id:17,cat:"mra",q:"Which of the following market data types can you import into the system?",o:{A:"Correlations",B:"Discount factors",C:"Exchange rate",D:"Exchange limits",E:"Interest rates"},a:["A", "C", "E"]},
+{id:18,cat:"mra",q:"You are implementing Market Risk Analyzer and need to enable specific valuations by product types. What must you define?",o:{A:"Valuation rules",B:"Evaluation types",C:"General valuation classes",D:"Valuation areas"},a:["A"]},
+{id:19,cat:"cfin",q:"Which documents originate from asset postings in the source system are not posted to Fixed Asset Accounting (Fl-AA) in the Central Finance system?",o:{A:"Replicated Fl documents",B:"Hana document",C:"SAP MDG documents",D:"SAP Simple Finance documents"},a:["A"]},
+{id:20,cat:"mra",q:"You implement Market Risk Analyzer.",o:{A:"A hierarchy of portfolios provided by the Portfolio characteristic",B:"An organizational hierarchy",C:"A hierarchy to compare the results of different values at risk",D:"A hierarchy selected from characteristics"},a:["A"]},
+{id:21,cat:"tm",q:"Which fields are required to enter a money market contract?",o:{A:"Portfolio",B:"Product type",C:"Company code",D:"Business partner",E:"Security ID number"},a:["B", "C", "E"]},
+{id:22,cat:"cfin",q:"What is used to transfer postings from a period, for example the current fiscal year, from your source systems to your Central Finance system?",o:{A:"Use periodic re-posting",B:"Use settlement",C:"The initial load",D:"Use overhead surcharging"},a:["B"]},
+{id:23,cat:"cash",q:"SAP_SFIN_CASH_MANAGER is a sample role that maps the whole cash management process?",o:{A:"True",B:"False"},a:["A"]},
+{id:24,cat:"hedge",q:"Which of the following contract types is used as a hedging instrument? Current account style instrument",o:{A:"Fixed-term deposit",B:"Current account style instrument",C:"Loan",D:"FX-Forward"},a:["D"]},
+{id:25,cat:"hedge",q:"What are the phases of a hedging relationship?",o:{A:"Rollover",B:"End",C:"Exposure capture",D:"Ongoing life",E:"Inception"},a:["B", "D", "E"]},
+{id:26,cat:"gen",q:"Where you determine how the system fills the financial object properties from the data fields of the exposure positions?",o:{A:"In the derivation strategy",B:"SAP S/4HANA On-Premises Edition",C:"Project cost and revenue by project",D:"Forecasted utilization"},a:["A"]},
+{id:27,cat:"bank",q:"Which features are available when you define payment approvals in Bank Account Management?",o:{A:"Payment approval limits are specified in local currency",B:"Signatory can be assigned to different signatory groups",C:"A validity period can be assigned to each signatory",D:"Payment approval limits can be defined for each signatory",E:"Payment approval patterns can be assigned by bank account country"},a:["B", "C", "D"]},
+{id:28,cat:"gen",q:"Is SAP S4 HANA can be deployed on which of below edition.",o:{A:"None of the above",B:"on Premise",C:"Private",D:"hybrid",E:"Cloud"},a:["B", "D", "E"]},
+{id:29,cat:"gen",q:"Which of the sheet recognition date is the date on which a receivable or payable is posted to the balance sheet?",o:{A:"System automatically",B:"Generates an ID",C:"The number range.",D:"Balance sheet"},a:["D"]},
+{id:30,cat:"hedge",q:"Where you collect future incoming and outgoing payments of your company that are associated with a currency risk?",o:{A:"The approver can be an external (e-mail) user.",B:"The approver must be a user in the system.",C:"Documents must be in Published status.",D:"In Exposure Management 2.0"},a:["D"]},
+{id:31,cat:"cra",q:"You are using Credit Risk Analyzer. Which type of Counterparty risk is tracked?",o:{A:"Interest rate risk",B:"Liquidity risk",C:"Inflationary risk",D:"Settlement risk"},a:["D"]},
+{id:32,cat:"cash",q:"Which of the following One Exposure fields should you populate as part of the initialization?",o:{A:"Account type",B:"Flow types",C:"Liquidity items",D:"House bank accounts",E:"Value date"},a:["B", "C", "D"]},
+{id:33,cat:"tm",q:"Which type of transactions are concluded with business partner within the transaction manager?",o:{A:"Financial transactions",B:"Cost Element Accounting",C:"Cost Center Accounting",D:"Profitability Analysis"},a:["A"]},
+{id:34,cat:"cash",q:"You want to classify cash flow lifecycle information from forecast to actual. What are the characteristics of flow type?",o:{A:"They allow bank account group view",B:"They allow classification of customers and vendors in cash forecast",C:"They distinguish forecasted cash flows from confirmed cash flows",D:"The flow types from 20 to 80 indicate these are forecasted cash flows"},a:["B", "C"]},
+{id:35,cat:"bank",q:"Which micro services are included in the SAP Cash Application?",o:{A:"Receivables line item matching",B:"Payment advice extraction",C:"Invoice extraction",D:"Line item clearing",E:"Payables line item matching"},a:["A", "B", "E"]},
+{id:36,cat:"bp",q:"At which levels are authorizations assigned in the BP standing instructions?",o:{A:"Product category",B:"Transaction type",C:".BP category",D:"Product type",E:"BP category"},a:["A", "B", "D"]},
+{id:37,cat:"mra",q:"Which calculation methods can you configure for the value at risk analysis?",o:{A:"Monte Carlo valuation",B:"Historical simulation",C:"Gap analysis",D:"Net present value calculation",E:"Variance/covariance approach"},a:["A", "B", "E"]},
+{id:38,cat:"tm",q:"You configure a new money market product and need to ensure that product follows the process steps: Order - Contract - Settlement. How do you achieve?",o:{A:"Product category assigned at transaction type level",B:"Product category assigned at product type level",C:"Processing category assigned at transaction type level",D:"Processing category assigned at the product type level"},a:["C"]},
+{id:39,cat:"hedge",q:"What customizing settings do you apply to automatically create hedge accounting data?",o:{A:"Create hedge item",B:"Automatic designation",C:"Exposure rollover",D:"Create hedge data",E:"Exposure premature settlement"},a:["C", "D", "E"]},
+{id:40,cat:"tm",q:"Which of the management uses the traded currency for FX forward transactions (FX forwards) and OTC options?",o:{A:"SAP Treasury and Risk Management",B:"SAP Ariba Account Administrator",C:"Removing obsolete addresses",D:"Data Migration"},a:["A"]},
+{id:41,cat:"bank",q:"In which order do you customize the EBS functionality?",o:{A:"Create account symbols, assign accounts to account symbols, Create Keys for posting rules, define posting rules",B:"Create Keys for posting rules, define posting rules, assign accounts to account symbols, assign bank accounts to transaction type",C:"Assign accounts to account symbols, assign interpretation algorithm to external transaction code, Create Keys for posting rules, assign bank accounts to transaction type",D:"Dont know"},a:["A"]},
+{id:42,cat:"hedge",q:"please explain the roles of typical questions arising from the TRM job roles? multiple answers for this question.",o:{A:"Cash Manager: How do i improve cash and liquidity forecasting and gain more accurate and timely insight into global cash balances?",B:"Treasury operations manager: How do i ensure highly secure and quickly payments and minimize external fees?",C:"Financial Risk manager\" How do i pinpoint my financial risks and take more effective steps to mitigate them\"?",D:"Treasury Finance Manager \"How do i improve company strategy\"?",E:"Sales Manager\" what is sales area wise\""},a:["A", "B", "C"]},
+{id:43,cat:"hedge",q:"Which of the components are calculated based on the forward (NPV_FWD) and the CCBS (NPV_CCBS) components?",o:{A:"SAP BW Workspace modeling and enrichment",B:"SAP Ariba Cloud Integration",C:"1322 Effective/Cost of Hedging Reserve",D:"1333 Ineffective/Cost of Hedging Reserve TPL"},a:["C", "D"]},
+{id:44,cat:"mra",q:"What are premiums and discounts on one side of a basis swap that make the swap into a fair transaction?",o:{A:"Basis spreads",B:"SAP BW Transformation",C:"CompositeProvider",D:"SAP HANA Decision Table"},a:["A"]},
+{id:45,cat:"hedge",q:"Which of the class is needed so that the position management procedure can be determined for exposure subitems?",o:{A:"General valuation class",B:"Open ODS View",C:"Public Edition",D:"Private Edition"},a:["A"]},
+{id:46,cat:"cash",q:"What must you do before you can use the Reconcile Cash Flows - Intraday Memo Record process?",o:{A:"Set the monitoring rules for the Intraday Bank Statements app.",B:"Set the Create Planning Types per Bank Account node.",C:"Configure tolerance groups.",D:"Configure the Define Transaction node."},a:["C"]},
+{id:47,cat:"hedge",q:"Where do you activate the Trading Platform Integration?",o:{A:"Hedge plan",B:"Hedging area",C:"Hedge profile",D:"Hedge management cockpit"},a:["A"]},
+{id:48,cat:"hedge",q:"Which of the rule specifies how the hedged item and the hedging transaction are valuated before designation, during designation, during the term, and during dedesignation of the hedging relationship?",o:{A:"SAP Process Integration",B:"Update the line item text",C:"Requests for quotation",D:"Hedge accounting rule"},a:["D"]},
+{id:49,cat:"hedge",q:"Which of the management enables you to gain an overview of the foreign exchange risk that your company is exposed to, as well as the hedging instruments which you used to mitigate that risk?",o:{A:"Intrastat Declaration Runs",B:"Minimum hardware",C:"Software requirements",D:"Hedge Management"},a:["D"]},
+{id:50,cat:"mra",q:"Which of the analyzer offers extensive position evaluations, such as mark-to-market valuations of financial transactions?",o:{A:"In SAP BW",B:"Active observers",C:"Administrators",D:"Market Risk Analyzer"},a:["D"]},
+{id:51,cat:"mra",q:"What is designed to provide the answers regarding the economic success of investments?",o:{A:"Board and Track",B:"Broadcast it with catalogs",C:"Article master",D:"Portfolio Analyzer"},a:["D"]},
+{id:52,cat:"mra",q:"You need to analyze the impact of an estimated change of interest rates on the Net Present Value (NPV) of portfolio?",o:{A:"Run key date valuation twice",B:"Use market data shifts",C:"Change the contracts interest conditions",D:"Execute monte-carlo value at risk valuation"},a:["D"]},
+{id:53,cat:"tm",q:"Which of the object is used to archive and delete financial transactions in the Transaction Manager as well as related subentities?",o:{A:"Follow-on project",B:"Dynamic Discounts",C:"TRTM_FTR archiving object",D:"SAP HANA"},a:["C"]},
+{id:54,cat:"bank",q:"You experience a low automatic reconciliation for incoming payments. What must you create?",o:{A:"A new reprocessing code",B:"A new posting rule",C:"A new bank clearing account",D:"A new search string rule"},a:["A"]},
+{id:55,cat:"mra",q:"Which import option for market data is supported?",o:{A:"Datafeed",B:"Market data wizard",C:"Bloomberg connector",D:"XML file upload"},a:["C"]},
+{id:56,cat:"cash",q:"Which of the following are source applications for snapshots in Cash Management?",o:{A:"Human Capital Management",B:"Project Systems",C:"Contract Accounts Receivable and Payable",D:"Consumer and Mortgage Loans"},a:["C", "D"]},
+{id:57,cat:"cfin",q:"Which logic is not active in the productive source system, the raw posting information does not get captured and is also not included in a copy of the system?",o:{A:"Central Finance",B:"Central Projects (WBS) - Reporting Scenario",C:"Partial Payments integration",D:"Activate central payment by company code"},a:["B"]},
+{id:58,cat:"mra",q:"You implement Market Risk Analyzer. What can you achieve when you use the results database?",o:{A:"Decouple the calculation of key figures from reporting.",B:"Combine net present value and value at risk in one report.",C:"Forward the net present value to transaction manager.",D:"Import yield curves ,foreign exchange rates ,and sensitivities."},a:["A", "B"]},
+{id:59,cat:"gen",q:"Which type of transactions are mapped for most of the product categories before the key date?",o:{A:"Typed in manually",B:"Copied from the sourcing library",C:"Imported from a spreadsheet",D:"Business transactions"},a:["D"]},
+{id:60,cat:"cash",q:"You are testing a cash flow transaction. How do you capture the flows?",o:{A:"They are inherent to a cash flow transaction.",B:"They are automatically generated by condition types.",C:"They are derived from the transaction type.",D:"They are entered manually."},a:["B"]},
+{id:61,cat:"mra",q:"Which of the model is largely an optimization in which the system finds values for the Hull-White volatility parameters sigma a and reversion rate a, in which the option prices, calculated using the Hull-White model or BlackScholes model, match as far as possible?",o:{A:"Calibration of the Hull-White interest rate model",B:"Purchase order",C:"Delivery note number",D:"Form-based document"},a:["A"]},
+{id:62,cat:"mra",q:"Which of the value always relates to a basis spread ID, a quotation type, and a rate date?",o:{A:"Basis spread value",B:"General data",C:"Accounting data",D:"Purchasing data"},a:["A"]},
+{id:63,cat:"bank",q:"When you use the bank account upload functionality, which of the following operations can you perform?",o:{A:"Change signatories",B:"Create attachments",C:"Create bank accounts",D:"Change bank accounts"},a:["C", "D"]},
+{id:64,cat:"bank",q:"Which event can you configure to generate correspondence?",o:{A:"Order expiration",B:"Rate fixing",C:"Contract creation",D:"Premature settlement"},a:["D"]},
+{id:65,cat:"bank",q:"You have enabled two business transaction events (BTE) in configuration to enable signatory control. What impact does this have on the payment approval process?",o:{A:"Users defined in SAP Bank Communication Management can approve payments.",B:"Users defined in SAP Bank Account Management can approve payments.",C:"Users defined in SAP Multi-Bank Connectivity can approve payments.",D:"Users defined in SAP Payment Engine can approve payments."},a:["B"]},
+{id:66,cat:"mra",q:"You need to analyze the result of an estimated change of interest rates on the net present value of the portfolio. How do you perform this analysis?",o:{A:"Maintain market data shifts.",B:"Run keydate valuation twice.",C:"Modify yield curves in market data.",D:"Change the contracts interest conditions."},a:["A"]},
+{id:67,cat:"hedge",q:"Which type of relationships are performed as key date valuations (transaction TPM1) or as part of derived business transactions?",o:{A:"Corporate Memory Layer",B:"Sourcing request",C:"Quote request",D:"Valuations during hedging relationships"},a:["D"]},
+{id:68,cat:"hedge",q:"Which of the areas is the basic master data in the hedge management cockpit?",o:{A:"XXL InfoObjects",B:"Business document",C:"Shelf panel",D:"Hedging Area"},a:["D"]},
+{id:69,cat:"hedge",q:"When entering raw exposures?",o:{A:"Historical snapshots and archiving",B:"Application authentication",C:"Operational Contract",D:"When you first enter the header data of the raw exposure and then the line items."},a:["D"]},
+{id:70,cat:"bp",q:"Which of the following prerequisites must a business partner have who is linked to a bank in the Manage Banks app?",o:{A:"The business partner category is a group.",B:"The financial services role is assigned.",C:"The bank role is assigned.",D:"The business partner category is an organization."},a:["C", "D"]},
+{id:71,cat:"cash",q:"You want to use SAP S/4HANA Basic Cash Management. Which functional features are provided with this setup?",o:{A:"Manage memo records",B:"Display bank accounts",C:"Manage workflows",D:"Manage liquidity items",E:"Monitor Cash positions"},a:["A", "B", "E"]},
+{id:72,cat:"hedge",q:"Which of the date is determined according to the settings that you have made in the Balance Sheet Recognition field on the Hedge Accounting I tab of the hedging area?",o:{A:"SAP HANA Platform",B:"Non-catalog items",C:"Existing kits",D:"Reclassification date"},a:["D"]},
+{id:73,cat:"bank",q:"What does SAP's Multi-Bank Connectivity provide for your project?",o:{A:"End-to-end integration to banks for incoming and outgoing payment processes.",B:"Direct integration to banks.",C:"Connects to multiple banks through real-time, batch, or manual upload/download.",D:"Cloud-based corporate to bank connectivity that is open to the public.",E:"End-to-end solution that can be used from either SAP ECC or SAP S/4HANA environments."},a:["A", "B", "C"]},
+{id:74,cat:"hedge",q:"Which of the derivative is required for performing the effectiveness tests?",o:{A:"Hypothetical derivative",B:"Cannot be edited directly",C:"After approval, used to generate one or more purchase orders",D:"Legal document, created by the system"},a:["A"]},
+{id:75,cat:"bank",q:"Which of the following are components of a DMEE format tree?",o:{A:"Atom",B:"Item",C:"Segment",D:"Header",E:"Element"},a:["C", "D", "E"]},
+{id:76,cat:"tm",q:"Which of the manager is based on the business partner concept?",o:{A:"SAP BW application",B:"Required tasks",C:"Work templates",D:"Transaction Manager"},a:["D"]},
+{id:77,cat:"bank",q:"Which type of payments can be processed with the Treasury payment program (Fill)?",o:{A:"Payments to employees (HCM)",B:"Bank to bank transfers",C:"Payments based on open items",D:"SAP In House Cash (IHC) payments",E:"Free form payments"},a:["B", "D", "E"]},
+{id:78,cat:"hedge",q:"You have customized the system for Hedge Accounting under IFRS. During period end activities, which of the following amounts of Hedging Instrument (HI) does the system post to Equity (OCI)?",o:{A:"For fair value hedges, the non-effective portion of change in fair value of the HI.",B:"For cash flow hedges, the non-effective portion of gain or loss of the HI.",C:"For cash flow hedges, the effective portion of gain or loss of the HI.",D:"For fair value hedges, the effective portion of change in fair value of the HI."},a:["C"]},
+{id:79,cat:"cfin",q:"In which activity, you can compare the actual postings to management accounting (CO) with the expected postings.?",o:{A:"The totals report for cost centers",B:"Compare Actual and Expected CO Postings in Central Finance",C:"The compact document journal",D:"The compact document journals"},a:["A"]},
+{id:80,cat:"bank",q:"You need to ensure the correspondence is generated after the trade is created and saved. What is the trigger for the correspondence?",o:{A:"Correspondence object",B:"Correspondence recipient type",C:"Communication channel",D:"Correspondence activity"},a:["D"]},
+{id:81,cat:"bank",q:"Which data element do you require to add a bank account to a bank account hierarchy?",o:{A:"Business partner",B:"SWIFT code",C:"House bank ID",D:"Account ID"},a:["A"]},
+{id:82,cat:"bank",q:"When you execute the treasury payment program, in which order must you execute the steps?",o:{A:"\"1. Enter payment parameters 2. Run payment proposal 3. Payment run - create payment medium 4. Payment run - accounting entries\"",B:"\"1. Run payment proposal 2. Enter payment parameters 3. Payment run - create payment medium 4. Payment run - accounting entries\"",C:"\"1. Enter payment parameters 2. Run payment proposal 3. Payment run - accounting entries 4. Payment run - create payment medium\"",D:"\"1. Run payment proposal 2. Enter payment parameters 3. Payment run - accounting entries 4. Payment run - create payment medium\""},a:["C"]},
+{id:83,cat:"mra",q:"Why do you set sensitive fields when you customize bank account master data?",o:{A:"To store sensitive information of the bank account",B:"To derive a special field status",C:"To protect fields against changes",D:"To trigger workflows using SAP Business Workflow"},a:["D"]},
+{id:84,cat:"gen",q:"What are entered on a higher level than the analysis items?",o:{A:"Target quotas",B:"CompositeProvider",C:"Business configuration",D:"Sales & Marketing"},a:["A"]},
+{id:85,cat:"mra",q:"Which of the following scenarios trigger a Bank Account Management work-flow?",o:{A:"Reviewing bank accounts",B:"Closing a bank account",C:"Adding attachments to a bank account",D:"Downloadinig bank accounts"},a:["B", "C"]},
+{id:86,cat:"tm",q:"You are testing new products. Which of the following trade types creates postings for an exchange of nominal amounts?",o:{A:"Swaption",B:"Cross-currency swap",C:"Credit default swap",D:"Interest rate swap"},a:["D"]},
+{id:87,cat:"gen",q:"Which methods are available to capture analysis characteristic values within a trade?",o:{A:"Direct interface",B:"Idoc",C:"Derivation strategy",D:"Manual input"},a:["C", "D"]},
+{id:88,cat:"hedge",q:"Which of the calculation type controls the creation of the hypothetical derivative, the decomposition of the market rate components, and the creation of the market value components?",o:{A:"Hedge accounting calculation",B:"Push down",C:"Capital Expenditure",D:"System attempts"},a:["A"]},
+{id:89,cat:"cash",q:"Which type of connection is used when data is uploaded to the SAP Analytics Cloud in memory HANA database?",o:{A:"Unified modelling",B:"Live connection",C:"Embedded Data Source",D:"Data Acquisition"},a:["B"]},
+{id:90,cat:"hedge",q:"Designation types are required with the automated designation process. Which combination of values can you use when you assign designation types in the hedging area?",o:{A:"* Company code * Valuation area * Company code on behalf of which the financial transaction is created * Hedging classification \" * Company code on behalf of which the financial transaction is created",B:"* Valuation area * Hedge strategy * Hedging classification \" * Company code on behalf of which the financial transaction is created",C:"* Valuation area * Hedging area * Currency \" * Company code",D:"* Valuation area * Hedging area * Hedging classification \""},a:["A"]},
+{id:91,cat:"gen",q:"Manager can be evaluated and monitored using the functions in Risk Management?",o:{A:"Column store",B:"Risk MGMT",C:"Surveys",D:"Financial Transactions"},a:["D"]},
+{id:92,cat:"hedge",q:"Which of the component is used to calculate the hedging reserve?",o:{A:"SAP Process Integration",B:"Update the line item text",C:"Requests for quotation",D:"Intrinsic Component"},a:["D"]},
+{id:93,cat:"hedge",q:"What is a position that is needed when you use the automated designation process for hedge accounting?",o:{A:"Exposure subitem",B:"Cash flow management",C:"Certificate logged",D:"local computer."},a:["A"]},
+{id:94,cat:"cash",q:"What advantages result from storing all cash management related data centrally in One Exposure?",o:{A:"Snapshot information from external systems can be integrated",B:"No need to reconcile line items & totals any longer",C:"Decreased data footprint is ensured",D:"More flexibility when combining attributes in reports",E:"Data is better protected against unwanted changes"},a:["B", "C", "D"]},
+{id:95,cat:"cash",q:"Intelligence to make smart decision using SAP Analytics Cloud. Sequence?",o:{A:"Insight - Information - Data - Action - Value",B:"Data - Information - Insight - Action - Value",C:"Information - Data - Insight - Action - Value",D:"Information - Data - Insight - Value - Action"},a:["B"]},
+{id:96,cat:"hedge",q:"Which of the profile is assigned to each hedging relationship in the Manage Hedging Relationships function (transaction TPM100) on the Hedging Relationship Details tab in the Risk and Profile area?",o:{A:"Hedging profile",B:"Business configuration",C:"Sales & Marketing",D:"SAP HANA execution mode"},a:["A"]},
+{id:97,cat:"cash",q:"Which of the ID is displayed and you can open a dialog box with detailed information about the snapshot corresponding to the exposure item?",o:{A:"Article",B:"Project Owners",C:"Surrogate Bidders",D:"Relevant snapshot ID"},a:["D"]},
+{id:98,cat:"bank",q:"Which of the following enhancements are available with the extended DME engine (DMEEX)?",o:{A:"Ability to test the format using a payment document",B:"Execution of mass synchronization",C:"Option to upload & download formats between systems using XML files",D:"Creation of a pdf file to document the format structure"},a:["B", "C"]},
+{id:99,cat:"cash",q:"From which sources can you copy reference data during the planning process?",o:{A:"Actual data",B:"Treasury cash flow data",C:"Cash position data",D:"Forecast data",E:"Previous plans"},a:["A", "D", "E"]},
+{id:100,cat:"hedge",q:"Which of the function selects the exposure subitem position flows to be reclassified?",o:{A:"Online Sourcing Functionality",B:"Competitive Bidding",C:"Advanced bid analysis tools",D:"Fix and Post Derived Business Transactions"},a:["D"]},
+{id:101,cat:"bp",q:"When a BP is linked to a bank in Manage Banks app, which pre-requisites are required?",o:{A:"\"Financial services\" role is assigned",B:"\"Bank Role\" is assigned",C:"BP category is a group",D:"BP category is an organization"},a:["B", "D"]},
+{id:102,cat:"hedge",q:"What is performed with the maturity date of the financial transaction and with the end of the hedging relationship?",o:{A:"Predictive results",B:"Upload from a PDF",C:"Create from a Contract Workspace",D:"Dedesignation"},a:["D"]},
+{id:103,cat:"mra",q:"Which object do you use to create a portfolio hierarchy?",o:{A:"Evaluation type",B:"Analysis structure",C:"Portfolio",D:"Financial object"},a:["B"]},
+{id:104,cat:"cra",q:"Which function is performed in Credit Risk Analyzer?",o:{A:"Evaluation procedure",B:"Value at risk calculation",C:"Portfolio analysis",D:"Online limit check"},a:["B"]},
+{id:105,cat:"mra",q:"You are testing the creation of references between contracts. For which scenarios does the system create references automatically?",o:{A:"Rollover of a foreign exchange forward",B:"Rollover of a money market deal",C:"Foreign exchange swap",D:"Second purchase of a security",E:"Mirrored deal"},a:["A", "B", "C"]},
+{id:106,cat:"mra",q:"You are preparing scenarios in Market Risk Analyzer for testing purposes. Which market data can you use to create scenarios?",o:{A:"Default rates",B:"Exchange rates",C:"Credit spreads",D:"Correlations"},a:["B", "C"]},
+{id:107,cat:"cra",q:"You are capturing the settings for new limit types in Credit Risk Analyzer. What do you define using the Define Limit Types configuration activity?",o:{A:"Limit transfer",B:"Limit characteristic assignment",C:"Determination procedure",D:"Limit amount"},a:["B", "C"]},
+{id:108,cat:"hedge",q:"Which of the components are used to calculate the cost of hedging reserve?",o:{A:"InfoSource fields",B:"SAP ERP buyers",C:"SAP ERP systems",D:"CCBS (NPV_CCBS) components"},a:["D"]},
+{id:109,cat:"cash",q:"You observe missing memo record information on a report. Which table do you analyze?",o:{A:"FDES",B:"FQLSUM",C:"FQM_FLOW",D:"FDSB"},a:["C"]},
+{id:110,cat:"bank",q:"You work on a business blueprint for the correspondence business partner group. Which configuration settings can you select?",o:{A:"Counter confirmation required",B:"Contract settlement required",C:"Automatic correspondence",D:"Correspondence object creation"},a:["C", "D"]},
+{id:111,cat:"gen",q:"Which source applications use Origin X when defining queries & query sequences?",o:{A:"TRM",B:"FI-GL",C:"FI-CA",D:"FI-AR"},a:["A", "C"]},
+{id:112,cat:"gen",q:"what are the benefits of Treasury and risk management belongs to S/4 HANA? multiple answers for this question.",o:{A:"The data model has been simplified",B:"Flexibility-SAP S4 Hana can be deployed on premise or in the cloud",C:"A brand new user experience is possiable",D:"the cost of the implementation can be saved",E:"SAP S4 Hana is built on SAP HANA and so inherits all the capabilities of this powerful in-memory data management and application platform"},a:["A", "B", "C", "E"]},
+{id:113,cat:"cash",q:"Which tool do you use to integrate data from Treasury and Risk Management to One Exposure from Operations Hub?",o:{A:"File Upload",B:"Direct Integration",C:"Flow Builder",D:"FQM Adapter"},a:["B"]},
+{id:114,cat:"bank",q:"Which setting in the Assign External Transaction Types to Posting Rules folder do you use?",o:{A:"Posting type",B:"Search string",C:"Interpretation algorithm",D:"Account modifier"},a:["C"]},
+{id:115,cat:"bank",q:"What do payment signatories in Bank Account Management enable you to do?",o:{A:"Assign different bank accounts with different signatories and payment approval.",B:"Assign signatories at the house bank ID level.",C:"Group bank accounts into different payment groups.",D:"Group signatories into different business groups."},a:["A", "D"]},
+{id:116,cat:"cash",q:"Which analytical tool do you use to display and develop liquidity plans?",o:{A:"SAP Analysis for Microsoft Office",B:"Design Studio",C:"SAP Lumira",D:"Tableau"},a:["A"]},
+{id:117,cat:"gen",q:"Which type of pools are entered in the master data?",o:{A:"Participants and Investment pools",B:"Process Compliance",C:"Pricing & Terms Repository",D:"Modern computer systems"},a:["A"]},
+{id:118,cat:"gen",q:"Which of the partner is used for asset positions, and the company code is used for liabilities positions?",o:{A:"Business partner",B:"Company",C:"Code currency",D:"Object currency"},a:["A"]},
+{id:119,cat:"hedge",q:"Which of the management cockpit gives you an overview of your current net open exposures, so you can take your hedging decisions?",o:{A:"Hedge Management",B:"Integration with other",C:"Areas is enabled.",D:"External system"},a:["A"]},
+{id:120,cat:"gen",q:"Where the system calculates a premium for the transactions and saves this only as a current market value?",o:{A:"In a sourcing event",B:"Process Compliance",C:"Pricing & Terms Repository",D:"In the case of currency options"},a:["D"]},
+{id:121,cat:"bank",q:"Which money market activity categories can you configure to generate correspondence?",o:{A:"Contract",B:"Rollover",C:"Offer",D:"Rate fixing",E:"Premature settlement"},a:["A", "B", "C"]},
+{id:122,cat:"bank",q:"In which order do you customize the electronic bank statement functionality?",o:{A:"\"Create keys for posting rules. Define posting rules. Assign accounts to account symbols. Assign bank accounts to transaction type.\"",B:"\"Create account symbols. Assign accounts to account symbol. Create keys for posting rules. Define posting rules.\"",C:"\"Assign accounts to account symbols. Assign interpretation algorithm to external transaction code. Create keys for posting rules. Assign bank accounts to transaction type.\"",D:"\"Create account symbols. Assign external transaction types to posting rules. Create keys for posting rules. Create transaction type.\""},a:["B"]},
+{id:123,cat:"hedge",q:"Which of the setting available is hedge strategy 500 with calculation type 201 Interest Rate Instrument: Benchmark without Accrued Interest?",o:{A:"Concept of column data storage",B:"Find Buyers ready to Buy",C:"Accelerate Sales Cycles",D:"Standard Customizing setting"},a:["D"]},
+{id:124,cat:"hedge",q:"Which main components does the TRM solution consists of as below?",o:{A:"General Ledger",B:"Transaction Manager",C:"Cost center controlling",D:"Risk analyzers",E:"Hedge Management"},a:["B", "D", "E"]},
+{id:125,cat:"cash",q:"Which advantages do you have by using the side-car approach for SAP SMHANA Cash Management?",o:{A:"The One Exposure structures in ECC and SAP S/4HANA are kept in-sync through distributed cash management.",B:"The centralized cash position analysis and the liquidity forecast are available in SAP S/4HANA",C:"The full scope of make bank transfers and approve bank payments based on Bank Communication Management is available.",D:"The bank relationship management across all bank accounts can be managed in SAP S/4HANA."},a:["B", "D"]},
+{id:126,cat:"cfin",q:"What makes ensure that Fl transactions that are dependent on one another are not processed simultaneously as this could lead to errors?",o:{A:"Serialization in AIF",B:"System using SAP AIF",C:"Accounting Document Change",D:"Replicated Fl documents"},a:["A"]},
+{id:127,cat:"gen",q:"What cannot be linked to the corresponding CO line items. For example, when document summarization is turned on, new postings cannot be created because no CO object can be found to which expenses or revenues are posted?",o:{A:"The costs are determined by the cost estimate of a reference order",B:"Optimal support for operations",C:"Differences occur when Fl document line items",D:"The actual quantities are valuated with plan values"},a:["C"]},
+{id:128,cat:"hedge",q:"Which of the level is used to determine whether the hedging instruments are designated to the net exposure item or to the gross exposure item with larger absolute value of the relevant analysis item?",o:{A:"Target CompositeProvider (HCPR)",B:"Scheduling Agreement",C:"Setting up internal support teams",D:"Designation level"},a:["D"]},
+{id:129,cat:"hedge",q:"Which of the risk tile displays balance sheet FX risk measures absolute exposures, absolute hedges, and absolute net exposures as well as hedge amount and exposure amounts on the level of the company codes in display currency?",o:{A:"Balance Sheet FX Risk",B:"Active observers",C:"Administrators",D:"Global observers"},a:["A"]},
+{id:130,cat:"mra",q:"You need to separate security positions by valuation area, special valuation class, and securities account. Which customizing activity do you perform?",o:{A:"Define valuation areas.",B:"Define and assign differentiations.",C:"Define position attributes.",D:"Define security account groups."},a:["B"]},
+{id:131,cat:"gen",q:"Which of the data transfer program uses an import (receiver) structure called a transfer category to map external data to risk objects?",o:{A:"External data",B:"Board and Track",C:"Broadcast it with catalogs",D:"Article master"},a:["A"]},
+{id:132,cat:"bank",q:"Which objects can you use to assign payment approval patterns in customizing?",o:{A:"Currency and amount limit",B:"Account type and company code",C:"Currency and account type",D:"Company code and amount limit"},a:["B"]},
+{id:133,cat:"gen",q:"Which of the manager is responsible for providing information about the short- and medium-term financial situation as a basis for financial planning?",o:{A:"Amount-based commodities",B:"Project Owners",C:"Surrogate Bidders",D:"Fund manager"},a:["D"]},
+{id:134,cat:"gen",q:"What can either be on providing an internal service for the affiliated group companies?",o:{A:"Request for Proposals",B:"SAP HANA",C:"Approval tasks",D:"Emphasis"},a:["D"]},
+{id:135,cat:"bank",q:"Which of the following payments can be executed by the treasury payment program?",o:{A:"Payments to customers and vendors",B:"Mobile payments",C:"Loans Management payments",D:"Payroll payments",E:"Payment requests"},a:["A", "C", "E"]},
+{id:136,cat:"mra",q:"You need to approve the standard workflow template WS78500050. Which SAP Fiori app do you use?",o:{A:"Manage Workflow Templates",B:"Manage Workflows",C:"For Bank Accounts",D:"Manage Workflow Scenarios",E:"Workflow Administration"},a:["B"]},
+{id:137,cat:"bank",q:"What must you do when you configure the Automatic Payment Transactions for Payment Requests program?",o:{A:"Define payment method(s) by bank.",B:"Define payment request number ranges by company code.",C:"Specify the payment request clearing account by company code.",D:"Specify currencies valid for each payment method."},a:["C"]},
+{id:138,cat:"gen",q:"what are the three different SAP FIORI App types below mentioned?",o:{A:"Transactional",B:"Analytical",C:"None of the above",D:"Factsheet"},a:["A", "B", "D"]},
+{id:139,cat:"bank",q:"Which roles are associated with the Bank Account Review process?",o:{A:"Final reviewer",B:"Review initiator",C:"Legal reviewer",D:"Authorized reviewer"},a:["B", "D"]},
+{id:140,cat:"cash",q:"How does SAP define Liquidity Management?",o:{A:"It is a short to medium term cash and liquidity tool to manage future cash requirements.",B:"It is a liquidity forecast tool to determine potential future customer inflows and vendor outflows of cash.",C:"It is a medium to long term analytical forecast and planning tool to identify use and source of actual cash movements.",D:"It is a liquidity forecast tool to identify short to medium term liquidity needs. movements."},a:["C"]},
+{id:141,cat:"cfin",q:"During which of the phase of the initial load it is sometimes necessary to reset the data transferred by the initial load?",o:{A:"Controlling Phase",B:"Functional Phase",C:"Operating Phase",D:"Test Phase"},a:["D"]},
+{id:142,cat:"tm",q:"Where the Transaction Manager supports you by complying with the legal requirements according to the German Fiscal Code and the publication Principles of Data Access and Verifiability of Digital Documentation from the German Federal Ministry of Finance?",o:{A:"SAP applications",B:"ASN and Quality",C:"In the area of Treasury and Risk Management",D:"Inventory Collaboration"},a:["C"]},
+{id:143,cat:"hedge",q:"You are implementing the new Foreign Exchange (FX) Hedge Management and Hedge Accounting. You define a hedging profile, which is used for the configuration of the hedging are a. What can you specify in the hedging profile?",o:{A:"Designation types",B:"Hedging scenario",C:"Product types for exposure subitems",D:"Settings used for the effectiveness tests"},a:["B", "D"]},
+{id:144,cat:"gen",q:"Which of the data is stored in business partner maintenance under Company Code on a number of tabs?",o:{A:"Configure transactions documents",B:"SAP Ariba Cloud Integration",C:"SAP Ariba solutions",D:"Company-code-dependent data"},a:["B"]},
+{id:145,cat:"cra",q:"After you activate financial object integration for Market Risk Analyzer, what becomes available for the contracts?",o:{A:"Online limit check",B:"Hedging relationships",C:"Analysis parameters tab",D:"Status tab"},a:["C"]},
+{id:146,cat:"mra",q:"Which of the following objects is considered master data for a securities contract?",o:{A:"CI General valuation class",B:"CI Financial position object",C:"CI Master agreement",D:"CI Class data"},a:["D"]},
+{id:147,cat:"cfin",q:"Which mapping do you use for objects which are maintained in customizing?",o:{A:"Process Integration mapping",B:"MDG key mapping (ID mapping)",C:"MDG value mapping (code mapping)",D:"Cost object mapping framework"},a:["C"]},
+{id:148,cat:"gen",q:"Which of the following are components of a format tree?",o:{A:"Item",B:"Element",C:"Footer",D:"Atom",E:"Header"},a:["B", "D", "E"]},
+{id:149,cat:"cra",q:"You configure Credit Risk Analyzer. What must you do to activate the Single Transaction Check.",o:{A:"Define at least one single-transaction-check product.",B:"Schedule the Utilization report.",C:"Enable the end-of-day processing of the Credit Risk Analyzer.",D:"Activate the integrated default risk limit check."},a:["A", "D"]},
+{id:150,cat:"gen",q:"Which of the types are derived from the exposure types, and the respective business activity types are determined from the exposure activity types?",o:{A:"Indicate you are not interested in a supp|ier's response",B:"Respond to a supp|ier's question",C:"A simple request for a needed Contract creation.",D:"Corresponding business types"},a:["D"]},
+{id:151,cat:"tm",q:"Which of the manager provides the instruments for processing the related financial transactions, from deal capture through to transferring the relevant data to Financial Accounting?",o:{A:"Transaction Manager",B:"Biding rules",C:"Currency rules",D:"Market feedback"},a:["A"]},
+{id:152,cat:"gen",q:"Where you can specify whether auto matching needs to be performed for a given risk type?",o:{A:"Query views",B:"Segment",C:"Catalog",D:"In the Customizing settings for the exposure lifecyclec"},a:["D"]},
+{id:153,cat:"mra",q:"You need to run three accounting principles (GAAPs) in parallel for one accounting code. How must you specify the accounting settings?",o:{A:"Three valuation areas",B:"Three general valuation classes",C:"One general valuation class",D:"Three portfolios",E:"Three valuation classes"},a:["A", "C", "E"]},
+{id:154,cat:"mra",q:"Which elements control account determination for Transaction Manager deals?",o:{A:"Account assignment reference",B:"Valuation area",C:"Portfolio",D:"Update type",E:"Flow type"},a:["A", "B", "C"]},
+{id:155,cat:"gen",q:"The data footprint increased with the introduction of SAP S/4 HANA.",o:{A:"True",B:"False"},a:["B"]},
+{id:156,cat:"cfin",q:"What cannot be posted because of an invalid mapping rule, missing Customizing, or master data?",o:{A:"Profit Center Accounting",B:"Central Finance Project System Master Data",C:"Documents",D:"Profit Center Accounting Simulation"},a:["C"]},
+{id:157,cat:"mra",q:"What can be based on both real and simulated market prices?",o:{A:"Article master",B:"New Leads",C:"Contract & Supplier Management",D:"Valuations"},a:["D"]},
+{id:158,cat:"gen",q:"Which action is unique to a Non-Deliverable Forward deal type?",o:{A:"Knock-in",B:"Exercise",C:"Give notice",D:"Rate fixing"},a:["D"]},
+{id:159,cat:"cash",q:"Which of the following comparisons are available for liquidity analysis?",o:{A:"Actual to actual",B:"Plan to forecast",C:"Liquidity hierarchy to liquidity hierarchy",D:"Plan to actual"},a:["B", "D"]},
+{id:160,cat:"hedge",q:"Which of the requests are now relevant for the trader, who searches for the released FX hedge requests in the Process Hedge Request fuction and creates hedging instruments, according to the information given in the hedge request?",o:{A:"Request for quotation",B:"Payment method",C:"Platform support",D:"Released FX hedge requests"},a:["D"]},
+{id:161,cat:"cfin",q:"Where you can navigate back from an Fl document to the original sales order?",o:{A:"SAP Master Data Governance",B:"Master Data Consolidation",C:"Controlling Documents",D:"Document Relationship Browser"},a:["D"]},
+{id:162,cat:"cra",q:"Which of the analyzer focuses on measuring, analyzing and controlling counterparty default risk?",o:{A:"Credit Risk Analyzer",B:"Find Buyers ready to Buy",C:"Accelerate Sales Cycles",D:"Customer Retention"},a:["A"]},
+{id:163,cat:"hedge",q:"Which of the option allows you to write-up or write-down a position to a fixed book value?",o:{A:"Manual valuation",B:"Historic Value",C:"Reserve Value",D:"New Composite Provider"},a:["A"]},
+{id:164,cat:"mra",q:"Which of the class is automatically determined from the settings made in Customizing on the product type level?",o:{A:"Valuation class",B:"Biding rules",C:"Currency rules",D:"Market feedback"},a:["A"]},
+{id:165,cat:"mra",q:"Which is the right order the transaction Manager steps are mostly used in TRM? please provide correct sequence?",o:{A:"Reporting,payment, Create Deal,Posting, Settle deal,Valuation",B:"Valuation, payment, Create Deal, Reporting, Posting, Settle deal",C:"Create Deal,settle deal, Posting, payment, Valuation, Reporting",D:"Posting,Settle deal,Valuation, payment, Create Deal, Reporting"},a:["C"]},
+{id:166,cat:"bank",q:"Which of the following are dual control workflows in treasury payment processes?",o:{A:"Free form payment approval",B:"Bank-to-bank transfer payment approval",C:"Repetitive code template creation approval",D:"Repetitive code payment approval"},a:["A", "C"]},
+{id:167,cat:"hedge",q:"You implement hedge management and hedge accounting. Explain the hypothetical derivative?",o:{A:"It is representation of hedged item for classification calculation",B:"It is the representation of the hedging instrument",C:"It is the link between hedged item and hedging instrument",D:"It is representation of hedging relationship in Market risk analyzer"},a:["A", "C"]},
+{id:168,cat:"hedge",q:"Which of the classification is relevant for the Hedge Management and Accounting for Net Open Exposures (FX Risk) process?",o:{A:"Capital Expenditure",B:"System attempts",C:"Hedging classification",D:"latest price components"},a:["C"]},
+{id:169,cat:"gen",q:"Which of the manager is responsible for managing all the company's treasury activities?",o:{A:"SAP BW/4HANA",B:"Create and edit announcements",C:"View audit logs",D:"Treasury Manager"},a:["D"]},
+{id:170,cat:"bank",q:"What must you specify when you configure payment methods?",o:{A:"Direction of the payment method",B:"Distribution amount",C:"Minimum amount limit",D:"Document type for payment and clearing"},a:["C", "D"]},
+{id:171,cat:"hedge",q:"What is used only for selected monetary assets and liabilities since the changes in value of the hedging instrument and the underlying transaction have usually already been recognized in profit and loss?",o:{A:"Hedge Accounting",B:"Article master",C:"New Leads",D:"Contract & Supplier"},a:["A"]},
+{id:172,cat:"cash",q:"Which financial account type requires rate type 'Average' when using currency conversion in planning model?",o:{A:"Income",B:"Expenses",C:"Assets",D:"Liabilities"},a:["A", "B"]},
+{id:173,cat:"hedge",q:"Which of the program first checks whether the flows and sub raw exposures can be archived?",o:{A:"Customer projects",B:"Statistical authorities",C:"Direct cost projects",D:"Preprocessing program"},a:["D"]},
+{id:174,cat:"tm",q:"What are used for the interest rate instrument on which the reference interest rate is based to describe when and how much money is paid?",o:{A:"Perform cost accounting",B:"Sales order management",C:"Review tasks",D:"Interest conditions"},a:["D"]},
+{id:175,cat:"cfin",q:"What does allow you to distribute messages to different users, use alerts, and carry out reporting?",o:{A:"SAP AIF",B:"FINS_CFIN_AIF_CO",C:"FINS_CFIN_AIF_DOC_POST",D:"FINS_CFIN_AIF_GEN"},a:["A"]},
+{id:176,cat:"gen",q:"Which of the component is a subarea of the Treasury Management solution area?",o:{A:"Treasury and Risk Management component",B:"In SAP HANA",C:"Online Sourcing Functionality",D:"Competitive Bidding"},a:["A"]},
+{id:177,cat:"gen",q:"Where you define interest conditions for reference interest rates?",o:{A:"Cost Element Accounting",B:"Cost Center Accounting",C:"Profitability Analysis",D:"In Customizing"},a:["D"]},
+{id:178,cat:"cash",q:"Which of the following details must you enter when you define Cash Management account names?",o:{A:"The G/L account corresponding to the bank account",B:"The planning type for the bank account",C:"The bank account number",D:"The currency of the bank account"},a:["A"]},
+{id:179,cat:"cash",q:"Which dimension type supports the custom hierarchies in SAP Analytics cloud?",o:{A:"Generic",B:"Version",C:"Account",D:"Date"},a:["C"]},
+{id:180,cat:"hedge",q:"Which of the items are necessary for the Hedge Accounting process. During the automated designation process the hedged exposure item is identified automatically and the corresponding exposure subitems are created and assigned to the hedged items?",o:{A:"Operational Data Store",B:"SAP Ariba Sourcing",C:"SAP Ariba Contracts",D:"Exposure items"},a:["D"]},
+{id:181,cat:"hedge",q:"Preparing a handbook for testers on new Foreign exchange (FX) Hedge management solution. When must you take a snapshot?",o:{A:"After you determine hedging requirements; Before the decision on a hedging instrument is final.",B:"After the decision on a hedging instrument is final; Before you process the hedging instrument.",C:"After you capture raw exposure data; Before you create hedging area",D:"After you capture raw exposure data; Before you conclude the hedging contract"},a:["C"]},
+{id:182,cat:"hedge",q:"What are the sources for exposure to be displayed in the hedge management cockpit ?",o:{A:"Balance sheet exposures",B:"Exposure management 2.0",C:"Commodities exposure",D:"One exposure from operations hub"},a:["B", "D"]},
+{id:183,cat:"bank",q:"You customize the Define Search String for Electronic Bank Statement node. What do you enter into the target field?",o:{A:"The clearing algorithm",B:"The value to be searched",C:"The posting rule",D:"The value that is derived"},a:["D"]},
+{id:184,cat:"tm",q:"You create a securities account with a liability security accounts category. Which securities does it hold?",o:{A:"Own issued bonds",B:"Purchased bonds",C:"Loans",D:"Repurchase agreements"},a:["A"]},
+{id:185,cat:"hedge",q:"Which of the currencies are the currencies that are relevant for hedging in the hedging area?",o:{A:"OData providers",B:"SAP Data Services",C:"SAP ERP extractors",D:"Risk Currencies"},a:["D"]},
+{id:186,cat:"hedge",q:"Which of the management cockpit enables you to gain an overview of the foreign exchange risk that your company is exposed to, as well as the hedging instruments?",o:{A:"Hedge Management Cockpit",B:"Request management",C:"SAP Ariba Commerce",D:"Open opportunity"},a:["A"]},
+{id:187,cat:"cash",q:"What must you define before you can create a liquidity item hierarchy?",o:{A:"General liquidity item derivations",B:"Company code-specific liquidity item derivations",C:"Liquidity items",D:"Liquidity plan"},a:["C"]},
+{id:188,cat:"cfin",q:"Why must you assign special accounts (clearing and substitution accounts) for the initial load during customizing?",o:{A:"There must be a substitution account for every reconciliation account.",B:"Loading balances need an offsetting account.",C:"After initial load, an offsetting account will be posted automatically to achieve a balanced balance sheet.",D:"Substitution accounts must be used for sensitive data of the source system."},a:["A", "B"]},
+{id:189,cat:"cfin",q:"When the asset information is deleted from asset-related fields of the Fl documents, for example from the fields ANLN1 and ALN2?",o:{A:"Before this type of document is posted in the Central Finance system",B:"Add-In (BAdl) to transfer the asset information to customer defined fields",C:"All asset accounts for APC and cumulated depreciation",D:"The G/L accounts to which acquisition"},a:["A"]},
+{id:190,cat:"hedge",q:"If the exposure position has been transferred to Hedge Management, which of the following applies:",o:{A:"A hedge plan must exist.",B:"A hedged item needs to have been created.",C:"The end date of the hedge plan and the reclassification dates of all related hedge items must fall before the key date for archiving.",D:"Location master data"},a:["A", "B", "C"]},
+{id:191,cat:"hedge",q:"Which of the exposures are risk positions that result from transactions that you can either import using a BAPI from a source system?",o:{A:"Raw exposures",B:"SAP HANA Live browser",C:"Contract & Supplier Management",D:"PO & Invoices (Unlimited)"},a:["A"]},
+{id:192,cat:"hedge",q:"Which of the key figures are calculated for the hedging instrument and for the hypothetical derivative?",o:{A:"Good for sourcing of standard items",B:"Allows for exploration and comparison of a variety of possible options",C:"Enables suppliers to differentiate themselves",D:"Hedge Accounting Key"},a:["D"]},
+{id:193,cat:"mra",q:"What is determined on the basis of past data for the price parameter?",o:{A:"Statistical orders",B:"Statistical projects",C:"Profit centers",D:"Historical volatility"},a:["D"]},
+{id:194,cat:"gen",q:"Which of the pool participants are represented in the system by a fund or a combination of a fund and grant?",o:{A:"Investment pool participants",B:"A bill of materials (BOM)",C:"Forecast Commit",D:"PO / Schedule Agreement Collab"},a:["A"]},
+{id:195,cat:"cash",q:"You are setting up a model for Liquidity Planning in SAP Analytics Cloud. Which steps are required to establish the model?",o:{A:"Add an input task",B:"Map Data",C:"Add a data source",D:"Add dimensions",E:"Define a style"},a:["A", "D", "E"]},
+{id:196,cat:"cash",q:"You note missing memo record information on a report. Which table do you check to analyze the problem?",o:{A:"FQLSUM",B:"FQM_FLOW",C:"FDSB",D:"FDES"},a:["B"]},
+{id:197,cat:"tm",q:"You create a money market cieaLWhen do you specify the currency on the entry screen?",o:{A:"When the currency is identical to the company code currency",B:"When the currency is a NON-deliverable currency",C:"When the currency is different than the company code currency",D:"When the currency of the counterparty is different than the company code currency"},a:["C"]},
+{id:198,cat:"tm",q:"You configure a new money market product and need to ensure the product follows the Order - Contract - Settlement process steps. How do you achieve this requirement?",o:{A:"With the processing category which is assigned at the product type level",B:"With the processing category which is assigned at the transaction type level",C:"With the product category which is assigned at the product type level",D:"With the product category which is assigned at the transaction type level"},a:["B"]},
+{id:199,cat:"tm",q:"Which of the pool certificates are mapped using securities from the Investment Certificate product category?",o:{A:"Investment pool certificates",B:"eRFX, Auctions",C:"Knowledge/Repository",D:"Ariba Discovery"},a:["A"]},
+{id:200,cat:"bank",q:"Which of the logic is based on repayment flows that contain the payment date, payment amount and currency?",o:{A:"Calculation logic",B:"Dual-stack split tool",C:"Sub agreement",D:"Standalone agreement"},a:["A"]},
+{id:201,cat:"cfin",q:"All asset accounts for APC and accumulated depreciation must either be set up as a non- reconciliation balance sheet account or mapped to a non reconciliation balance sheet account?",o:{A:"In the Central Finance system",B:"In the GL account system",C:"In the asset system",D:"In the source system"},a:["A"]},
+{id:202,cat:"cfin",q:"Which type of user; who is responsible for analyzing errors in AIF a user based on the role template SAP_AIF_USER.?",o:{A:"End user",B:"Business user",C:"Client",D:"The replication of asset"},a:["B"]},
+{id:203,cat:"hedge",q:"What are risk positions that result from your transactions and that you can either import using a BAPI from a source system create automatically logistics, or enter manually in the system?",o:{A:"Raw exposures",B:"Creating",C:"Initial",D:"Composing"},a:["A"]},
+{id:204,cat:"mra",q:"You implement Market Risk Analyzer and work on the financial object integration. Which setting do you choose to ensure a Transaction Manager contract is saved with the mandatory Market Risk Analyzer data?",o:{A:"Completely active",B:"Partial integration",C:"Partially active",D:"Full integration"},a:["A"]},
+{id:205,cat:"cash",q:"You are implementing the Memo Record function. Which memo record characteristics are controlled by the planning type?",o:{A:"Field status definition",B:"Archiving category",C:"House bank account",D:"General ledger account",E:"Number range"},a:["A", "B", "E"]},
+{id:206,cat:"cra",q:"You implement Credit Risk Analyzer. What do you use to configure the determination of the attributable amount?",o:{A:"Default risk rule",B:"Determination procedure",C:"Limit product group",D:"Limit type"},a:["B", "D"]},
+{id:207,cat:"cfin",q:"The internal accounting interface posts Financial Accounting (Fl)/Management Accounting (CO) documents to _________________as a universal journal entry.",o:{A:"SAP Master Data Governance",B:"SAP Simple Finance",C:"SAP Hana",D:"Fl document"},a:["C"]},
+{id:208,cat:"cash",q:"The frontend business role SAP_BR_CASH_MANAGER provides an example on how you could group cash management related tiles into catalogs and groups.",o:{A:"False",B:"True"},a:["B"]},
+{id:209,cat:"bank",q:"Which of the directory must contain master data on all the banks that you require for payment transactions with your business partners?",o:{A:"Supplier",B:"Invoice",C:"Hierarchy Node",D:"Bank Directory"},a:["D"]},
+{id:210,cat:"hedge",q:"Which of the date is derived from the designation splitting settings made on the Hedge Accounting I tab in the hedging area?",o:{A:"Payment method",B:"Platform support",C:"Price components",D:"Deviant date"},a:["D"]},
+{id:211,cat:"cfin",q:"Which type of documents requires specific configuration in the Central Finance system?",o:{A:"Replicated FI-AA document",B:"Replicated FI-GL document",C:"The replication of asset",D:"Replicated Fl documents"},a:["C"]},
+{id:212,cat:"cash",q:"Which reference data sources can the subsidiary cash manager use for planning purposes?",o:{A:"Plan data of the previous planning cycle",B:"Previous year's actual data",C:"Previous year's liquidity forecast data",D:"Previous year's actual data with a percentage changes in all values",E:"Liquidity forecast data"},a:["A", "B", "E"]},
+{id:213,cat:"bank",q:"Which pricing types are supported when you create a new bank fee condition?",o:{A:"Tier pricing",B:"Permanent pricing",C:"Discount pricing",D:"Unit pricing",E:"Flat pricing"},a:["A", "D", "E"]},
+{id:214,cat:"cash",q:"For which data do you define liquidity item derivation rules of type origin X?",o:{A:"Data from remote systems",B:"Supplier line items",C:"Bank statement postings",D:"Customer line items"},a:["A"]},
+{id:215,cat:"gen",q:"Which of the apps reference library has details about the content necessary for giving users access to an app on the SAP Fiori launchpad?",o:{A:"Commodity",B:"Project amount",C:"SAP Fiori apps",D:"Contract length"},a:["C"]},
+{id:216,cat:"hedge",q:"Which of the values are required for the valuation that takes place during the release of hedging business transactions?",o:{A:"SAP ERP systems",B:"SAP ERP users",C:"Open ODS View",D:"Component values"},a:["D"]},
+{id:217,cat:"gen",q:"What are the three SAP FIORI USER experience paradigms as below mentioned?",o:{A:"Instant Value",B:"Role based",C:"None of the above",D:"Simple",E:"Coherent F. Responsive"},a:["A", "B", "D", "E"]},
+{id:218,cat:"cfin",q:"The G/L accounts to which acquisition and production costs (APC) are posted, as well as the G/L accounts for the cumulated depreciation, are defined as reconciliation accounts for fixed assets?",o:{A:"In the Central Finance system",B:"In the asset system",C:"In the source system",D:"In the GL account system"},a:["C"]},
+{id:219,cat:"tm",q:"Which of the following are back office tasks for an interest rate instrument?",o:{A:"Reverse",B:"Exercise",C:"Rollover",D:"Settle"},a:["C", "D"]},
+{id:220,cat:"bank",q:"Which of the following are components of a DMEE format tree?",o:{A:"Header",B:"Item",C:"Segment",D:"Element",E:"Atom"},a:["A", "C", "D"]},
+{id:221,cat:"gen",q:"Which of the apps reference library has details about the content necessary for giving users access to an app on the SAP Fiori launchpad?",o:{A:"SAP Fiori apps",B:"Commodity",C:"Project amount",D:"Contract length"},a:["A"]},
+{id:222,cat:"cash",q:"Which steps must you configure to activate SAP SAHANA Cash Management?",o:{A:"Specify the cash scope as full scope.",B:"Activate the business function FIN_FSCM_CLM.",C:"Specify the cash scope as basic scope.",D:"Activate the business function FIN_FSCIM_CLIV1."},a:["A", "B"]},
+{id:223,cat:"hedge",q:"Which of the items reflect the granularity on which you monitor and hedge your FX exposures in the hedge management cockpit (transaction TOENE)?",o:{A:"Sales employee",B:"ImpEx extension",C:"Purchase orders",D:"Analysis items"},a:["D"]},
+{id:224,cat:"gen",q:"What is earned from the investment of these funds represents a secure and long-term financial source?",o:{A:"Attribute groups",B:"Commodity Classification",C:"Enrichment Services",D:"Revenue"},a:["D"]},
+{id:225,cat:"hedge",q:"Which of the class is needed so that the position management procedure can be determined for exposure subitems?",o:{A:"In-place conversion",B:"Greenfield conversion",C:"Remote conversion",D:"General valuation"},a:["D"]},
+{id:226,cat:"tm",q:"Which activities can you configure to initiate the deal release workflow for a money market transaction?",o:{A:"Change",B:"Premature settlement",C:"Reversal",D:"Add or create",E:"Delete"},a:["A", "C", "D"]},
+{id:227,cat:"bank",q:"What are the available account revision options when you configure the bank account revision process? (3)",o:{A:"Formal activation",B:"Indirect activation",C:"Activate directly",D:"Activate via workflow",E:"Activate via dual control"},a:["C", "D", "E"]},
+{id:228,cat:"hedge",q:"Which of the carries the hedging reserve and cost of hedging reserve of the hedging instrument?",o:{A:"In the BW462 Demo Data InfoArea",B:"Application and User Management",C:"Business Analytics",D:"Exposure subitem carries"},a:["D"]},
+{id:229,cat:"bank",q:"Which of the following describes the customization of the payment approval pattern?",o:{A:"1 is the highest priority when multiple payment approval patterns are assigned.",B:"The company code and account type must be used when the payment approval patterns are assigned.",C:"The payment approval patterns are assigned with the maximum amount limit.",D:"A sequential and a non-sequential payment approval pattern can be assigned to a bank account."},a:["D"]},
+{id:230,cat:"bank",q:"Which of the following file types are supported by default when you use SAP Multi-Bank Connectivity?",o:{A:"Bank statement files",B:"SWIFT correspondence acknowledgement files",C:"SWIFT correspondence files",D:"SWIFT payment files",E:"SWIFT payment status files"},a:["A", "D", "E"]},
+{id:231,cat:"hedge",q:"Which of the item represents the operational exposure that results from designation splitting?",o:{A:"Hedged item",B:"Approval tasks",C:"Request for Proposals",D:"SAP HANA"},a:["A"]},
+{id:232,cat:"mra",q:"Which import option for market data is supported within SAP TRM?",o:{A:"Bloomberg connector",B:"Datafeed",C:"XML file upload",D:"Market data wizard"},a:["B"]},
+{id:233,cat:"tm",q:"Which activities can you configure to initiate the deal release workflow for a money market transaction?",o:{A:"Change",B:"Premature settlement",C:"Reversal",D:"Add or create",E:"Delete"},a:["A", "C", "D"]},
+{id:234,cat:"hedge",q:"You are configuring Exposure Management 2.0 which is used with Hedge Management. What can you achieve with the exposure activity type?",o:{A:"Configure the procedures for an automatic derivation of hedging relationships",B:"Activate the dual control option.",C:"Distinguish incoming from outgoing exposures.",D:"Determine whether raw exposures shall be released manually or automatically."},a:["C", "D"]},
+{id:235,cat:"cash",q:"For which money market trade types are fast entry tiles available?",o:{A:"Commercial Paper",B:"Facility",C:"Cash Flow Instrument",D:"Fixed Term Deposit",E:"Deposit at Notice"},a:["A", "D", "E"]}
+];
+var BUILTIN_EXAMS=[
+ {code:'C_ACT_2403', title:'SAP Activate (C_ACT)', subtitle:'Project & Methodology Associate', cats:CATS_CACT, questions:Q_CACT},
+ {code:'C_S4FTR_1909', title:'Treasury & Risk (C_S4FTR)', subtitle:'SAP S/4HANA Treasury Associate', cats:CATS_TRM, questions:Q_TRM}
+];
+
+</script>
+<script>
+/* ============ Simulado de Certificações SAP — Dexterity ============ */
+var MEM={};
+function lsGet(k){try{var v=localStorage.getItem(k);return v;}catch(e){return (k in MEM)?MEM[k]:null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){MEM[k]=v;}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){delete MEM[k];}}
+function jget(k,d){var v=lsGet(k);if(v==null)return d;try{return JSON.parse(v);}catch(e){return d;}}
+function jset(k,o){lsSet(k,JSON.stringify(o));}
+
+var PROFILE_K="sim_profile_v1",SESS_K="sim_sessions_v1",CUSTOM_K="sim_custom_exams_v1";
+var ADMIN_PASS="dexterity"; /* altere a senha do modo admin aqui */
+
+var profile=jget(PROFILE_K,null);
+var state={view:"home",examCode:null,cfg:null,lastResult:null,adminMsg:""};
+var quiz=null,adminUnlocked=false;
+
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function sameSet(a,b){if(a.length!==b.length)return false;var x=a.slice().sort().join(),y=b.slice().sort().join();return x===y;}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pctOf(c,t){return t?Math.round(c/t*100):0;}
+function fmtDate(iso){var d=new Date(iso);return ("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2);}
+function fmtDT(iso){var d=new Date(iso);return d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}
+function fmtDur(ms){var s=Math.round(ms/1000),m=Math.floor(s/60);return m+"m "+(s%60)+"s";}
+
+function customExams(){return jget(CUSTOM_K,[]);}
+function allExams(){return BUILTIN_EXAMS.concat(customExams());}
+function getExam(c){return allExams().filter(function(e){return e.code===c;})[0];}
+function catInfo(ex,k){return (ex.cats&&ex.cats[k])||{label:k,color:"#888"};}
+function allSessions(){return jget(SESS_K,{});}
+function examSessions(c){return allSessions()[c]||[];}
+function saveSession(c,s){var a=allSessions();(a[c]=a[c]||[]).push(s);jset(SESS_K,a);}
+function clearSessions(c){var a=allSessions();delete a[c];jset(SESS_K,a);}
+
+function statsFor(c){var ex=getExam(c),m={};ex.questions.forEach(function(q){m[q.id]={attempts:0,correct:0,last:null};});
+  examSessions(c).forEach(function(se){se.items.forEach(function(it){var x=m[it.qid];if(!x)return;x.attempts++;if(it.correct)x.correct++;x.last=it.correct;});});return m;}
+function examAccuracy(c){var t=0,cc=0;examSessions(c).forEach(function(se){t+=se.count;cc+=se.items.filter(function(i){return i.correct;}).length;});return {t:t,c:cc,pct:pctOf(cc,t)};}
+
+/* ---------------- render ---------------- */
+function $(id){return document.getElementById(id);}
+function render(){document.getElementById("app").innerHTML=(!profile?onboarding():topbar()+'<div class="wrap">'+viewBody()+'</div>');}
+function go(v){state.view=v;render();}
+function openExam(c){state.examCode=c;state.view="examHome";render();}
+
+function viewBody(){
+  switch(state.view){
+    case "home":return homeV();
+    case "examHome":return examHomeV();
+    case "setup":return setupV();
+    case "quiz":return quizV();
+    case "results":return resultsV();
+    case "reports":return reportsV();
+    case "admin":return adminV();
+    default:return homeV();
+  }
+}
+
+function topbar(){
+  var n=function(id,lab){return '<button class="navbtn '+(state.view===id?"on":"")+'" onclick="go(\''+id+'\')">'+lab+'</button>';};
+  var rel = state.examCode? '<button class="navbtn '+(state.view==="reports"?"on":"")+'" onclick="go(\'reports\')">Relatórios</button>':'';
+  return '<div class="nav"><div class="navin">'+
+    '<div class="row gap" style="cursor:pointer" onclick="go(\'home\')"><div style="width:34px;height:34px;border-radius:9px;background:var(--ce);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800" class="ttl">S</div><span class="ttl" style="font-size:21px">Simulado SAP</span></div>'+
+    '<div class="row" style="gap:4px">'+n("home","Início")+rel+n("admin","Admin")+
+    '<span class="row gap" style="margin-left:8px;padding:6px 12px;border-radius:999px;background:var(--ow);font-size:13px;font-weight:600"><span style="color:var(--rx)">●</span>'+esc(profile.name)+'</span></div>'+
+    '</div></div>';
+}
+
+/* ---------------- onboarding ---------------- */
+function onboarding(){
+  return '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">'+
+   '<div class="card soft" style="max-width:440px;width:100%;padding:32px">'+
+   '<div class="ttl" style="width:44px;height:44px;border-radius:12px;background:var(--ce);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin-bottom:16px">S</div>'+
+   '<h1 class="ttl" style="font-size:30px;margin:0 0 6px">Simulado SAP</h1>'+
+   '<p class="muted" style="margin:0 0 20px;font-size:14px">Crie seu perfil. Seu progresso fica salvo neste navegador e é separado por certificação.</p>'+
+   '<label class="small" style="font-weight:600">Seu nome</label>'+
+   '<input id="onbName" class="in" style="width:100%;margin:6px 0 18px" placeholder="Ex.: Diego" onkeydown="if(event.key===\'Enter\')saveProfile()">'+
+   '<button class="btn btn-pri" style="width:100%" onclick="saveProfile()">Começar</button>'+
+   '</div></div>';
+}
+function saveProfile(){var v=($("onbName").value||"").trim();if(!v)return;profile={name:v,createdAt:new Date().toISOString()};jset(PROFILE_K,profile);render();}
+
+/* ---------------- home (exam picker) ---------------- */
+function homeV(){
+  var cards=allExams().map(function(ex){
+    var acc=examAccuracy(ex.code), ns=examSessions(ex.code).length, custom=customExams().some(function(c){return c.code===ex.code;});
+    return '<button class="card soft btn-ghost" style="text-align:left;padding:18px;border-radius:16px" onclick="openExam(\''+ex.code+'\')">'+
+      '<div class="row between"><span class="ttl" style="font-size:19px">'+esc(ex.title)+'</span>'+(custom?'<span class="badge" style="background:var(--rx)">Custom</span>':'')+'</div>'+
+      '<div class="muted small" style="margin-top:2px">'+esc(ex.subtitle||"")+'</div>'+
+      '<div class="row between" style="margin-top:14px"><span class="muted small">'+ex.questions.length+' questões</span>'+
+      '<span class="small" style="font-weight:700;color:var(--ce)">'+(ns?acc.pct+"% · "+ns+" simulado(s)":"sem histórico")+'</span></div>'+
+      '</button>';
+  }).join("");
+  return '<h2 class="ttl" style="font-size:26px;margin:4px 0 2px">Olá, '+esc(profile.name)+'</h2>'+
+    '<p class="muted" style="margin-top:0">Escolha uma certificação para praticar.</p>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:14px">'+cards+'</div>';
+}
+
+/* ---------------- exam home ---------------- */
+function examHomeV(){
+  var ex=getExam(state.examCode),acc=examAccuracy(ex.code),st=statsFor(ex.code),ns=examSessions(ex.code).length;
+  var best=ns?Math.max.apply(null,examSessions(ex.code).map(function(s){return pctOf(s.items.filter(function(i){return i.correct;}).length,s.count);})):0;
+  var answered=Object.keys(st).filter(function(k){return st[k].attempts>0;}).length;
+  var kpi=function(lab,val){return '<div class="card soft kpi"><div class="lab">'+lab+'</div><div class="ttl val">'+val+'</div></div>';};
+  var quick=function(lab,desc,fn,acc2){return '<button class="card soft btn-ghost" style="text-align:left;padding:16px;border-radius:14px" onclick="'+fn+'"><div class="row between"><span class="ttl" style="font-size:17px">'+lab+'</span><span style="color:'+(acc2||"var(--ce)")+'">→</span></div><p class="muted small" style="margin:6px 0 0">'+desc+'</p></button>';};
+  return '<button class="btn btn-ghost" style="margin-bottom:12px" onclick="go(\'home\')">← Certificações</button>'+
+   '<h2 class="ttl" style="font-size:24px;margin:0">'+esc(ex.title)+'</h2>'+
+   '<p class="muted" style="margin:2px 0 16px">'+ex.questions.length+' questões · '+Object.keys(ex.cats).length+' áreas</p>'+
+   '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">'+
+     kpi("Precisão geral",acc.pct+"%")+kpi("Melhor",best+"%")+kpi("Simulados",ns)+kpi("Cobertura",answered+"/"+ex.questions.length)+'</div>'+
+   '<div class="card soft" style="padding:22px;margin-top:16px"><h3 class="ttl" style="font-size:19px;margin:0 0 14px">Começar rápido</h3>'+
+     '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+
+       quick("Treino curto","10 questões aleatórias, feedback imediato","quickStart(10,'study','random')")+
+       quick("Simulado parcial","Escolha quantidade e áreas","go('setup')")+
+       quick("Prova completa",ex.questions.length+" questões, correção no final","quickStart("+ex.questions.length+",'exam','random')")+
+       quick("Focar pontos fracos","Prioriza áreas com menor acerto","quickStart(20,'study','weak')","var(--am)")+
+     '</div></div>'+
+   '<div class="row gap" style="margin-top:16px"><button class="btn btn-pri" onclick="go(\'setup\')">Configurar simulado</button><button class="btn btn-ghost" onclick="go(\'reports\')">Ver relatórios</button></div>';
+}
+function defaultCfg(){return {count:20,mode:"study",source:"random",cats:Object.keys(getExam(state.examCode).cats),shuffle:true,target:65};}
+function quickStart(n,mode,src){state.cfg=defaultCfg();state.cfg.count=n;state.cfg.mode=mode;state.cfg.source=src;startQuiz();}
+
+/* ---------------- setup ---------------- */
+function buildPool(ex,cfg){
+  var st=statsFor(ex.code);
+  var pool=ex.questions.filter(function(q){return cfg.cats.indexOf(q.cat)>=0;});
+  if(cfg.source==="weak"){pool=pool.slice().sort(function(a,b){var sa=st[a.id],sb=st[b.id];var ra=sa.attempts?sa.correct/sa.attempts:2,rb=sb.attempts?sb.correct/sb.attempts:2;return ra-rb;});}
+  else if(cfg.source==="wrong"){pool=pool.filter(function(q){return st[q.id].attempts>0&&st[q.id].last===false;});}
+  else if(cfg.source==="unseen"){pool=pool.filter(function(q){return st[q.id].attempts===0;});}
+  if(cfg.shuffle&&cfg.source!=="weak")pool=shuffle(pool);
+  return pool;
+}
+function setupV(){
+  var ex=getExam(state.examCode);
+  if(!state.cfg)state.cfg=defaultCfg();
+  var cfg=state.cfg;var max=buildPool(ex,cfg).length;if(cfg.count>max)cfg.count=Math.max(1,max);
+  var srcs=[["random","Aleatórias"],["weak","Focar pontos fracos"],["wrong","Revisar erradas"],["unseen","Nunca respondidas"]];
+  var srcChips=srcs.map(function(s){return '<button class="chip '+(cfg.source===s[0]?"on":"")+'" style="'+(cfg.source===s[0]?"background:var(--ce);border-color:var(--ce)":"")+'" onclick="setCfg(\'source\',\''+s[0]+'\')">'+s[1]+'</button>';}).join("");
+  var catChips=Object.keys(ex.cats).map(function(k){var on=cfg.cats.indexOf(k)>=0,col=catInfo(ex,k).color;return '<button class="chip '+(on?"on":"")+'" style="'+(on?"background:"+col+";border-color:"+col:"color:var(--mut)")+'" onclick="toggleCat(\''+k+'\')">'+esc(catInfo(ex,k).label)+'</button>';}).join("");
+  var modeBtn=function(m,t,sub){var on=cfg.mode===m;return '<button class="chip" style="flex:1;min-width:150px;text-align:left;border-radius:12px;padding:14px;'+(on?"border-color:var(--ce);background:rgba(0,153,148,.07)":"")+'" onclick="setCfg(\'mode\',\''+m+'\')"><div class="ttl" style="font-size:16px;color:'+(on?"var(--ce)":"var(--gf)")+'">'+t+'</div><div class="muted small">'+sub+'</div></button>';};
+  var countBlock = max===0
+    ? '<div class="row gap" style="color:var(--err)">⚠ Nenhuma questão para os filtros atuais. Ajuste a fonte ou as áreas.</div>'
+    : '<div class="row gap wrapf"><input id="cRange" type="range" min="1" max="'+max+'" value="'+cfg.count+'" oninput="syncCount(this.value)" style="flex:1;min-width:160px;accent-color:var(--ce)">'+
+      '<input id="cNum" class="in" type="number" min="1" max="'+max+'" value="'+cfg.count+'" style="width:72px;text-align:center" oninput="syncCount(this.value)">'+
+      '<div class="row" style="gap:6px">'+[10,20,40].filter(function(n){return n<=max;}).map(function(n){return '<button class="chip" onclick="setCount('+n+')">'+n+'</button>';}).join("")+'<button class="chip" onclick="setCount('+max+')">Todas</button></div></div>';
+  return '<button class="btn btn-ghost" style="margin-bottom:12px" onclick="go(\'examHome\')">← '+esc(ex.title)+'</button>'+
+   '<h2 class="ttl" style="font-size:24px;margin:0 0 14px">Configurar simulado</h2>'+
+   '<div class="card soft" style="padding:20px">'+
+     '<div style="margin-bottom:20px"><div class="sec">Modo</div><div class="row gap wrapf">'+modeBtn("study","Estudo","Feedback imediato")+modeBtn("exam","Prova","Correção no final")+'</div></div>'+
+     '<div style="margin-bottom:20px"><div class="sec">Fonte das questões</div><div class="row gap wrapf">'+srcChips+'</div></div>'+
+     '<div style="margin-bottom:20px"><div class="sec">Áreas ('+cfg.cats.length+'/'+Object.keys(ex.cats).length+')</div><div class="row gap wrapf">'+catChips+'</div></div>'+
+     '<div style="margin-bottom:20px"><div class="sec">Quantidade — disponíveis: '+max+'</div>'+countBlock+'</div>'+
+     '<div style="margin-bottom:20px"><div class="sec">Opções</div><div class="row gap wrapf">'+
+       '<label class="row gap" style="font-size:14px"><input type="checkbox" '+(cfg.shuffle?"checked":"")+' onchange="setCfg(\'shuffle\',this.checked)" style="accent-color:var(--ce);width:16px;height:16px"> Embaralhar</label>'+
+       '<label class="row gap" style="font-size:14px">Meta de aprovação:<input class="in" type="number" min="1" max="100" value="'+cfg.target+'" style="width:64px;text-align:center;padding:6px 8px" onchange="setCfg(\'target\',Math.max(1,Math.min(100,+this.value||1)))"> %</label>'+
+     '</div></div>'+
+     '<button class="btn btn-pri" style="width:100%" '+(max===0?"disabled":"")+' onclick="startQuiz()">Iniciar '+Math.min(cfg.count,max||1)+' questões</button>'+
+   '</div>';
+}
+function setCfg(k,v){state.cfg[k]=v;render();}
+function toggleCat(k){var c=state.cfg.cats,i=c.indexOf(k);if(i>=0){if(c.length>1)c.splice(i,1);}else c.push(k);render();}
+function syncCount(v){v=Math.max(1,+v||1);state.cfg.count=v;if($("cNum"))$("cNum").value=v;if($("cRange"))$("cRange").value=v;}
+function setCount(n){state.cfg.count=n;render();}
+
+/* ---------------- quiz ---------------- */
+function startQuiz(){var ex=getExam(state.examCode),cfg=state.cfg||defaultCfg();var pool=buildPool(ex,cfg);var n=Math.min(cfg.count,pool.length);var qs=pool.slice(0,n);if(!qs.length)return;quiz={questions:qs,idx:0,answers:{},revealed:{},start:Date.now(),cfg:JSON.parse(JSON.stringify(cfg)),confirmCancel:false};go("quiz");}
+function quizV(){
+  var ex=getExam(state.examCode),q=quiz.questions[quiz.idx],multi=q.a.length>1,sel=quiz.answers[q.id]||[],revealed=quiz.cfg.mode==="study"&&quiz.revealed[q.id];
+  var ci=catInfo(ex,q.cat),answered=quiz.questions.filter(function(x){return (quiz.answers[x.id]||[]).length>0;}).length;
+  var opts=Object.keys(q.o).map(function(L){
+    var chosen=sel.indexOf(L)>=0,bd="var(--line)",bg="#fff",ic="";
+    if(chosen&&!revealed){bd="var(--ce)";bg="rgba(0,153,148,.06)";}
+    if(revealed){if(q.a.indexOf(L)>=0){bd="var(--mg)";bg="rgba(89,124,89,.10)";ic='<span style="color:var(--mg)">✓</span>';}else if(chosen){bd="var(--err)";bg="rgba(192,80,74,.08)";ic='<span style="color:var(--err)">✗</span>';}}
+    return '<button class="opt" style="border-color:'+bd+';background:'+bg+'" '+(revealed?"disabled":"")+' onclick="pick(\''+L+'\')"><span class="optl" style="'+(chosen&&!revealed?"background:var(--ce);color:#fff":"")+'">'+L+'</span><span style="flex:1">'+esc(q.o[L])+'</span>'+ic+'</button>';
+  }).join("");
+  var feedback="";
+  if(revealed){var ok=sameSet(sel,q.a);feedback='<div style="margin-top:16px;padding:14px;border-radius:12px;background:var(--ow);border-left:4px solid '+(ok?"var(--mg)":"var(--err)")+'"><div class="ttl" style="font-size:14px;color:'+(ok?"var(--mg)":"var(--err)")+';margin-bottom:4px">'+(ok?"Correto":"Incorreto — resposta: "+q.a.join(", "))+'</div>'+(q.e?'<p class="muted small" style="margin:0;line-height:1.5">'+esc(q.e)+'</p>':"")+'</div>';}
+  var nav;
+  if(quiz.cfg.mode==="study"&&!revealed){nav='<button class="btn btn-acc" '+(sel.length?"":"disabled")+' onclick="confirmAns()">Confirmar</button>';}
+  else if(quiz.idx===quiz.questions.length-1){nav='<button class="btn btn-pri" onclick="finishQuiz()">Finalizar</button>';}
+  else{nav='<button class="btn btn-pri" onclick="navQ(1)">Próxima →</button>';}
+  var modal=quiz.confirmCancel?('<div class="modal" onclick="setCancel(false)"><div class="card soft" style="max-width:380px;width:100%;padding:26px;text-align:center" onclick="event.stopPropagation()">'+
+    '<div class="ttl" style="font-size:20px;margin:0 0 6px">Cancelar o teste?</div><p class="muted" style="margin:0 0 20px;font-size:14px">Seu progresso neste simulado não será salvo no histórico.</p>'+
+    '<div class="row gap"><button class="btn btn-ghost" style="flex:1" onclick="setCancel(false)">Continuar</button><button class="btn" style="flex:1;background:var(--err);color:#fff" onclick="cancelQuiz()">Cancelar teste</button></div></div></div>'):"";
+  return '<div class="row between wrapf" style="margin-bottom:12px"><button class="btn btn-danger" onclick="setCancel(true)">✗ Cancelar teste</button><span class="muted small" style="font-weight:600">Respondidas: '+answered+'/'+quiz.questions.length+'</span></div>'+
+   '<div class="barbg" style="margin-bottom:18px"><div style="height:100%;width:'+((quiz.idx+1)/quiz.questions.length*100)+'%;background:var(--ce)"></div></div>'+
+   '<div class="card soft" style="padding:24px">'+
+     '<div class="row between wrapf" style="gap:10px;margin-bottom:14px"><span class="badge" style="background:'+ci.color+'">'+esc(ci.label)+'</span><span class="ttl muted" style="font-size:16px">Questão '+(quiz.idx+1)+' de '+quiz.questions.length+'</span></div>'+
+     '<p style="font-size:17px;line-height:1.55;font-weight:600;margin:0 0 '+(multi?"6px":"14px")+'">'+esc(q.q)+'</p>'+
+     (multi?'<p style="font-size:12.5px;color:var(--rx);font-weight:600;margin:0 0 14px">Selecione '+q.a.length+' respostas</p>':"")+
+     '<div style="display:flex;flex-direction:column;gap:10px">'+opts+'</div>'+feedback+
+     '<div class="row between" style="margin-top:20px;gap:10px"><button class="btn btn-ghost" '+(quiz.idx===0?"disabled":"")+' onclick="navQ(-1)">← Anterior</button>'+nav+'</div>'+
+   '</div>'+modal;
+}
+function pick(L){var q=quiz.questions[quiz.idx];if(quiz.cfg.mode==="study"&&quiz.revealed[q.id])return;var cur=quiz.answers[q.id]||[],multi=q.a.length>1,nx;if(multi){nx=cur.indexOf(L)>=0?cur.filter(function(x){return x!==L;}):cur.concat([L]);}else nx=[L];quiz.answers[q.id]=nx;render();}
+function confirmAns(){var q=quiz.questions[quiz.idx];quiz.revealed[q.id]=true;render();}
+function navQ(d){quiz.idx=Math.max(0,Math.min(quiz.questions.length-1,quiz.idx+d));render();}
+function setCancel(b){quiz.confirmCancel=b;render();}
+function cancelQuiz(){quiz=null;go("examHome");}
+function finishQuiz(){var ex=getExam(state.examCode);var items=quiz.questions.map(function(q){var sel=quiz.answers[q.id]||[];return {qid:q.id,cat:q.cat,selected:sel,correct:sameSet(sel,q.a)};});var correct=items.filter(function(i){return i.correct;}).length;var sess={id:Date.now(),dateISO:new Date().toISOString(),mode:quiz.cfg.mode,source:quiz.cfg.source,count:items.length,durationMs:Date.now()-quiz.start,target:quiz.cfg.target,items:items};saveSession(ex.code,sess);state.lastResult={sess:sess,questions:quiz.questions,correct:correct,pctv:pctOf(correct,items.length)};quiz=null;go("results");}
+
+/* ---------------- results ---------------- */
+function resultsV(){
+  var ex=getExam(state.examCode),r=state.lastResult,s=r.sess,passed=r.pctv>=s.target;
+  var qmap={};r.questions.forEach(function(q){qmap[q.id]=q;});
+  var byCat={};s.items.forEach(function(it){var c=byCat[it.cat]||{t:0,c:0};c.t++;if(it.correct)c.c++;byCat[it.cat]=c;});
+  var catRows=Object.keys(byCat).map(function(k){var v=byCat[k],p=pctOf(v.c,v.t);return '<div style="margin-bottom:12px"><div class="row between small" style="margin-bottom:5px"><span style="font-weight:600">'+esc(catInfo(ex,k).label)+'</span><span class="muted">'+v.c+'/'+v.t+' · '+p+'%</span></div><div class="barbg"><div style="height:100%;width:'+p+'%;background:'+catInfo(ex,k).color+'"></div></div></div>';}).join("");
+  var rev=s.items.map(function(it,i){var q=qmap[it.qid];return '<div style="padding:14px;border-radius:12px;border:1px solid #eee6d6;background:'+(it.correct?"rgba(89,124,89,.05)":"rgba(192,80,74,.04)")+'"><div class="row gap" style="align-items:flex-start"><span style="color:'+(it.correct?"var(--mg)":"var(--err)")+';font-weight:800">'+(it.correct?"✓":"✗")+'</span><div style="flex:1"><p style="margin:0;font-size:14px;font-weight:600;line-height:1.45">'+(i+1)+'. '+esc(q.q)+'</p><p class="small" style="margin:6px 0 0;color:#6f6a5f">Sua resposta: <b>'+(it.selected.length?it.selected.join(", "):"—")+'</b> · Correta: <b style="color:var(--mg)">'+q.a.join(", ")+'</b></p>'+(q.e?'<p class="small muted" style="margin:4px 0 0;line-height:1.5">'+esc(q.e)+'</p>':"")+'</div></div></div>';}).join("");
+  return '<div class="card soft" style="padding:28px;text-align:center;border-top:5px solid '+(passed?"var(--mg)":"var(--am)")+'">'+
+     '<div class="ttl muted" style="font-size:15px">Resultado</div><div class="ttl" style="font-size:64px;line-height:1.1;color:'+(passed?"var(--mg)":"var(--am)")+'">'+r.pctv+'%</div>'+
+     '<p style="margin:4px 0 0;font-size:15px">'+r.correct+' de '+s.count+' corretas · '+fmtDur(s.durationMs)+'</p>'+
+     '<span class="badge" style="margin-top:12px;background:'+(passed?"var(--mg)":"var(--am)")+'">'+(passed?"Acima da meta":"Abaixo da meta")+' ('+s.target+'%)</span></div>'+
+   '<div class="card soft" style="padding:20px;margin-top:16px"><h3 class="ttl" style="font-size:18px;margin:0 0 14px">Desempenho por área</h3>'+catRows+'</div>'+
+   '<div class="card soft" style="padding:20px;margin-top:16px"><h3 class="ttl" style="font-size:18px;margin:0 0 14px">Revisão</h3><div style="display:flex;flex-direction:column;gap:10px">'+rev+'</div></div>'+
+   '<div class="row gap wrapf" style="margin-top:18px"><button class="btn btn-pri" style="flex:1;min-width:160px" onclick="go(\'setup\')">↻ Novo simulado</button><button class="btn btn-ghost" style="flex:1;min-width:160px" onclick="go(\'reports\')">Ver relatórios</button></div>';
+}
+
+/* ---------------- charts ---------------- */
+function lineChart(pts){
+  if(!pts.length)return"";var W=600,H=200,pl=34,pb=24,pt=12,pr=12,plotW=W-pl-pr,plotH=H-pt-pb;
+  var n=pts.length, xs=function(i){return pl+(n===1?plotW/2:plotW*i/(n-1));}, ys=function(v){return pt+(1-v/100)*plotH;};
+  var grid=[0,50,100].map(function(g){var y=ys(g);return '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="#eee6d6"/><text x="'+(pl-6)+'" y="'+(y+4)+'" font-size="10" fill="#9b958a" text-anchor="end">'+g+'</text>';}).join("");
+  var poly=pts.map(function(p,i){return xs(i)+","+ys(p.v);}).join(" ");
+  var dots=pts.map(function(p,i){return '<circle cx="'+xs(i)+'" cy="'+ys(p.v)+'" r="3" fill="var(--ce)"/>';}).join("");
+  var labs=pts.map(function(p,i){return (n>12&&i%2)?"":'<text x="'+xs(i)+'" y="'+(H-6)+'" font-size="9" fill="#9b958a" text-anchor="middle">'+p.label+'</text>';}).join("");
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">'+grid+'<polyline points="'+poly+'" fill="none" stroke="var(--ce)" stroke-width="2.5"/>'+dots+labs+'</svg>';
+}
+function barsH(items){
+  if(!items.length)return"";var rh=34,W=600,lw=160,pad=8,bw=W-lw-46,H=items.length*rh+pad;
+  var rows=items.map(function(it,i){var y=pad+i*rh,w=bw*it.v/100;return '<text x="0" y="'+(y+rh/2+4)+'" font-size="11" fill="#6f6a5f">'+esc(it.label.length>26?it.label.slice(0,24)+"…":it.label)+'</text>'+
+    '<rect x="'+lw+'" y="'+(y+6)+'" width="'+bw+'" height="'+(rh-14)+'" rx="5" fill="#efe9da"/>'+
+    '<rect x="'+lw+'" y="'+(y+6)+'" width="'+Math.max(2,w)+'" height="'+(rh-14)+'" rx="5" fill="'+it.color+'"/>'+
+    '<text x="'+(W-2)+'" y="'+(y+rh/2+4)+'" font-size="11" fill="#6f6a5f" text-anchor="end">'+it.v+'%</text>';}).join("");
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">'+rows+'</svg>';
+}
+
+/* ---------------- reports ---------------- */
+function reportsV(){
+  var ex=getExam(state.examCode),ses=examSessions(ex.code),st=statsFor(ex.code);
+  if(!ses.length)return '<button class="btn btn-ghost" style="margin-bottom:12px" onclick="go(\'examHome\')">← '+esc(ex.title)+'</button>'+'<div class="card soft" style="padding:40px;text-align:center"><h3 class="ttl" style="font-size:20px">Sem dados ainda</h3><p class="muted">Conclua um simulado de '+esc(ex.title)+' para ver sua evolução.</p></div>';
+  var acc=examAccuracy(ex.code),best=Math.max.apply(null,ses.map(function(s){return pctOf(s.items.filter(function(i){return i.correct;}).length,s.count);}));
+  var avg=fmtDur(ses.reduce(function(a,s){return a+s.durationMs;},0)/acc.t);
+  var days=Object.keys(ses.reduce(function(a,s){a[new Date(s.dateISO).toDateString()]=1;return a;},{})).map(function(d){return new Date(d).getTime();}).sort(function(a,b){return b-a;});
+  var streak=0;(function(){var dm=86400000,ref=new Date();ref.setHours(0,0,0,0);var t=ref.getTime();if(days.length&&(days[0]===t||days[0]===t-dm)){var cur=days[0];streak=1;for(var i=1;i<days.length;i++){if(days[i]===cur-dm){streak++;cur=days[i];}else if(days[i]===cur){}else break;}}})();
+  var answered=Object.keys(st).filter(function(k){return st[k].attempts>0;}).length;
+  var kpi=function(l,v){return '<div class="card soft kpi"><div class="lab">'+l+'</div><div class="ttl val">'+v+'</div></div>';};
+  var line=lineChart(ses.map(function(s){return {label:fmtDate(s.dateISO),v:pctOf(s.items.filter(function(i){return i.correct;}).length,s.count)};}));
+  var ca={};Object.keys(ex.cats).forEach(function(k){ca[k]={t:0,c:0};});ses.forEach(function(s){s.items.forEach(function(it){if(!ca[it.cat])ca[it.cat]={t:0,c:0};ca[it.cat].t++;if(it.correct)ca[it.cat].c++;});});
+  var bars=barsH(Object.keys(ca).filter(function(k){return ca[k].t>0;}).map(function(k){return {label:catInfo(ex,k).label,v:pctOf(ca[k].c,ca[k].t),color:catInfo(ex,k).color};}));
+  var miss=ex.questions.map(function(q){return {q:q,s:st[q.id]};}).filter(function(x){return x.s.attempts>0&&(x.s.attempts-x.s.correct)>0;}).sort(function(a,b){return (b.s.attempts-b.s.correct)-(a.s.attempts-a.s.correct);}).slice(0,8);
+  var missHtml=miss.map(function(x){var w=x.s.attempts-x.s.correct;return '<div class="row gap" style="align-items:flex-start;padding:12px;border-radius:10px;background:var(--ow)"><span class="badge" style="background:var(--err);flex-shrink:0">'+w+' erro'+(w>1?"s":"")+'</span><div style="flex:1"><p style="margin:0;font-size:13.5px;line-height:1.4;font-weight:600">'+esc(x.q.q)+'</p><p class="small muted" style="margin:3px 0 0">'+esc(catInfo(ex,x.q.cat).label)+' · '+x.s.correct+'/'+x.s.attempts+' acertos</p></div></div>';}).join("");
+  return '<button class="btn btn-ghost" style="margin-bottom:12px" onclick="go(\'examHome\')">← '+esc(ex.title)+'</button>'+
+   '<h2 class="ttl" style="font-size:24px;margin:0 0 14px">Relatórios · '+esc(ex.title)+'</h2>'+
+   '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">'+kpi("Precisão geral",acc.pct+"%")+kpi("Melhor",best+"%")+kpi("Sequência (dias)",streak)+kpi("Tempo/questão",avg)+kpi("Cobertura",answered+"/"+ex.questions.length)+'</div>'+
+   '<div class="card soft" style="padding:20px;margin-top:16px"><h3 class="ttl" style="font-size:18px;margin:0 0 6px">Evolução por simulado</h3>'+line+'</div>'+
+   '<div class="card soft" style="padding:20px;margin-top:16px"><h3 class="ttl" style="font-size:18px;margin:0 0 6px">Precisão por área</h3>'+bars+'</div>'+
+   (miss.length?'<div class="card soft" style="padding:20px;margin-top:16px"><h3 class="ttl" style="font-size:18px;margin:0 0 14px">Questões mais erradas</h3><div style="display:flex;flex-direction:column;gap:10px">'+missHtml+'</div></div>':"")+
+   '<div class="row gap wrapf" style="margin-top:18px"><button class="btn btn-ghost" onclick="exportProgress()">Exportar progresso (JSON)</button><button class="btn btn-danger" onclick="resetExam()">Zerar histórico desta prova</button></div>'+
+   '<p class="small muted" style="margin-top:16px">Histórico: '+ses.length+' simulado(s). Última atividade: '+fmtDT(ses[ses.length-1].dateISO)+'.</p>';
+}
+function resetExam(){if(confirm("Apagar todo o histórico desta certificação?")){clearSessions(state.examCode);render();}}
+function exportProgress(){download("progresso-"+state.examCode+".json",JSON.stringify({profile:profile,exam:state.examCode,sessions:examSessions(state.examCode)},null,2));}
+
+/* ---------------- admin ---------------- */
+function adminV(){
+  if(!adminUnlocked){
+    return '<h2 class="ttl" style="font-size:24px;margin:0 0 14px">Modo administrador</h2>'+
+     '<div class="card soft" style="padding:24px;max-width:420px"><p class="muted" style="margin-top:0;font-size:14px">Informe a senha para gerenciar certificações.</p>'+
+     '<input id="admPass" class="in" type="password" style="width:100%;margin-bottom:14px" placeholder="Senha" onkeydown="if(event.key===\'Enter\')unlockAdmin()">'+
+     '<button class="btn btn-pri" style="width:100%" onclick="unlockAdmin()">Entrar</button>'+
+     (state.adminMsg?'<p class="small" style="color:var(--err);margin-bottom:0">'+esc(state.adminMsg)+'</p>':"")+'</div>';
+  }
+  var exRows=allExams().map(function(ex){var custom=customExams().some(function(c){return c.code===ex.code;});
+    return '<div class="row between wrapf gap" style="padding:12px;border-bottom:1px solid var(--line)"><div><b>'+esc(ex.title)+'</b> <span class="small muted">'+esc(ex.code)+' · '+ex.questions.length+' questões</span> '+(custom?'<span class="badge" style="background:var(--rx)">Custom</span>':'<span class="badge" style="background:var(--mut)">Padrão</span>')+'</div>'+
+    '<div class="row gap"><button class="btn btn-ghost small" style="padding:7px 12px" onclick="exportExam(\''+ex.code+'\')">Exportar</button>'+(custom?'<button class="btn btn-danger small" style="padding:7px 12px" onclick="deleteExam(\''+ex.code+'\')">Excluir</button>':'')+'</div></div>';
+  }).join("");
+  return '<div class="row between wrapf" style="margin-bottom:14px"><h2 class="ttl" style="font-size:24px;margin:0">Administrador</h2><button class="btn btn-ghost" onclick="adminUnlocked=false;render()">Sair do admin</button></div>'+
+   '<div class="card soft" style="padding:8px 4px;margin-bottom:16px">'+exRows+'</div>'+
+   '<div class="card soft" style="padding:20px;margin-bottom:16px"><h3 class="ttl" style="font-size:18px;margin:0 0 12px">Adicionar certificação (colar dump)</h3>'+
+     '<div class="row gap wrapf" style="margin-bottom:10px"><input id="newTitle" class="in" style="flex:1;min-width:200px" placeholder="Título (ex.: SAP FI C_TS4FI)"><input id="newCode" class="in" style="width:200px" placeholder="Código (ex.: C_TS4FI_2023)"></div>'+
+     '<textarea id="newDump" class="in" style="width:100%;height:200px;font-family:ui-monospace,monospace;font-size:12px" placeholder="Cole aqui o texto no formato:\nNO.1 Pergunta...\nA. opção\nB. opção\nAnswer: A\nNO.2 ..."></textarea>'+
+     '<div class="row gap wrapf" style="margin-top:10px"><button class="btn btn-pri" onclick="addFromDump()">Processar e salvar</button>'+
+     '<label class="btn btn-ghost" style="cursor:pointer">Importar (JSON)<input type="file" accept="application/json" style="display:none" onchange="importExam(this)"></label></div>'+
+     (state.adminMsg?'<p class="small" style="margin-bottom:0;color:'+(state.adminMsg.indexOf("Erro")===0?"var(--err)":"var(--mg)")+'">'+esc(state.adminMsg)+'</p>':"")+
+   '</div>'+
+   '<p class="small muted">Observação: certificações adicionadas aqui ficam salvas neste navegador. Para que apareçam para todos os colegas de forma permanente, exporte o JSON e me envie para incluir no app publicado, ou migre para um backend compartilhado (Supabase).</p>';
+}
+function unlockAdmin(){var v=($("admPass").value||"");if(v===ADMIN_PASS){adminUnlocked=true;state.adminMsg="";}else{state.adminMsg="Senha incorreta.";}render();}
+function parseDump(text){
+  var noise=/^(IT Certification Guaranteed.*|Exam\s*:.*|Title\s*:.*|Vendor\s*:.*|Version\s*:.*)$/i;
+  var parts=text.split(/(?=NO\.\d+\b)/),blocks={};
+  parts.forEach(function(p){var m=p.match(/^NO\.(\d+)\b/);if(!m)return;var n=+m[1];if(!(n in blocks)||p.length>blocks[n].length)blocks[n]=p;});
+  var out=[];Object.keys(blocks).map(Number).sort(function(a,b){return a-b;}).forEach(function(n){
+    var lines=blocks[n].split(/\r?\n/).map(function(s){return s.trim();}).filter(function(s){return s&&!/^\d{1,3}$/.test(s)&&!noise.test(s);});
+    if(!lines.length)return;lines[0]=lines[0].replace(/^NO\.\d+\s*/,"");
+    var stem=[],opts={},cur=null,ans=null,mode="stem";
+    lines.forEach(function(ln){var am=ln.match(/^Answer:\s*([A-Ea-e](?:\s*,\s*[A-Ea-e])*)/i);if(am){ans=am[1].split(",").map(function(x){return x.trim().toUpperCase();});mode="done";return;}if(mode==="done")return;var om=ln.match(/^([A-E])\.\s*(.*)$/);if(om&&(mode==="stem"||mode==="opt")){mode="opt";cur=om[1];opts[cur]=om[2].trim();return;}if(mode==="stem")stem.push(ln);else if(mode==="opt"&&cur)opts[cur]=(opts[cur]+" "+ln).trim();});
+    var s=stem.join(" ").replace(/\(\s*\d\s*Correct Answer[s]?\s*\)/ig,"").replace(/Note:\s*There are \d+ correct answers to this question\.?/ig,"").replace(/\s*\b[1-5]\s*$/,"").replace(/\s{2,}/g," ").trim();
+    if(s&&ans&&Object.keys(opts).length>=2)out.push({id:n,q:s,o:opts,a:ans,cat:"geral"});
+  });
+  return out;
+}
+function addFromDump(){
+  var title=($("newTitle").value||"").trim(),code=($("newCode").value||"").trim().replace(/\s+/g,"_"),dump=$("newDump").value||"";
+  if(!title||!code){state.adminMsg="Erro: informe título e código.";return render();}
+  if(getExam(code)){state.adminMsg="Erro: já existe certificação com este código.";return render();}
+  var qs=parseDump(dump);
+  if(qs.length<1){state.adminMsg="Erro: nenhuma questão reconhecida. Verifique o formato (NO.x / A. / Answer:).";return render();}
+  var exam={code:code,title:title,subtitle:qs.length+" questões (importado)",cats:{geral:{label:"Geral",color:"#009994"}},questions:qs};
+  var cs=customExams();cs.push(exam);jset(CUSTOM_K,cs);
+  state.adminMsg=qs.length+" questões importadas com sucesso em "+title+".";render();
+}
+function deleteExam(code){if(!confirm("Excluir esta certificação e seu histórico?"))return;jset(CUSTOM_K,customExams().filter(function(e){return e.code!==code;}));clearSessions(code);state.adminMsg="Certificação removida.";render();}
+function exportExam(code){var ex=getExam(code);download(code+".json",JSON.stringify({code:ex.code,title:ex.title,subtitle:ex.subtitle,cats:ex.cats,questions:ex.questions},null,2));}
+function importExam(input){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o.code||!o.title||!Array.isArray(o.questions))throw 0;o.questions.forEach(function(q){if(!q.q||!q.o||!Array.isArray(q.a))throw 0;q.cat=q.cat||"geral";});if(!o.cats)o.cats={geral:{label:"Geral",color:"#009994"}};if(getExam(o.code)){state.adminMsg="Erro: código já existe.";return render();}var cs=customExams();cs.push(o);jset(CUSTOM_K,cs);state.adminMsg="Certificação "+o.title+" importada ("+o.questions.length+" questões).";render();}catch(e){state.adminMsg="Erro: arquivo JSON inválido.";render();}};r.readAsText(f);}
+
+function download(name,text){var b=new Blob([text],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+
+render();
+
+</script>
+</body>
+</html>
