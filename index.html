@@ -6,7 +6,6 @@
 <title>Simulado de Certificações SAP — Dexterity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 <style>
 :root{--ow:#F7F3E7;--gf:#4D4D4D;--ce:#009994;--rx:#98569A;--am:#FFA436;--mg:#597C59;--err:#C0504A;--line:#e7e0cf;--mut:#8a8478;}
 *{box-sizing:border-box}
@@ -41,6 +40,7 @@ a.dl{color:var(--ce);font-weight:700;text-decoration:none}
 .muted{color:var(--mut)} .small{font-size:12px}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -558,7 +558,6 @@ var BUILTIN_EXAMS=[
  {code:'C_ACT_2403', title:'SAP Activate (C_ACT)', subtitle:'Project & Methodology Associate', cats:CATS_CACT, questions:Q_CACT},
  {code:'C_S4FTR_1909', title:'Treasury & Risk (C_S4FTR)', subtitle:'SAP S/4HANA Treasury Associate', cats:CATS_TRM, questions:Q_TRM}
 ];
-
 </script>
 <script>
 /* ============ Simulado de Certificações SAP — Dexterity ============ */
@@ -590,8 +589,8 @@ function getExam(c){return allExams().filter(function(e){return e.code===c;})[0]
 function catInfo(ex,k){return (ex.cats&&ex.cats[k])||{label:k,color:"#888"};}
 function allSessions(){return jget(SESS_K,{});}
 function examSessions(c){return allSessions()[c]||[];}
-function saveSession(c,s){var a=allSessions();(a[c]=a[c]||[]).push(s);jset(SESS_K,a);}
-function clearSessions(c){var a=allSessions();delete a[c];jset(SESS_K,a);}
+function saveSession(c,s){var a=allSessions();(a[c]=a[c]||[]).push(s);jset(SESS_K,a);cloudSync();}
+function clearSessions(c){var a=allSessions();delete a[c];jset(SESS_K,a);cloudSync();}
 
 function statsFor(c){var ex=getExam(c),m={};ex.questions.forEach(function(q){m[q.id]={attempts:0,correct:0,last:null};});
   examSessions(c).forEach(function(se){se.items.forEach(function(it){var x=m[it.qid];if(!x)return;x.attempts++;if(it.correct)x.correct++;x.last=it.correct;});});return m;}
@@ -599,7 +598,14 @@ function examAccuracy(c){var t=0,cc=0;examSessions(c).forEach(function(se){t+=se
 
 /* ---------------- render ---------------- */
 function $(id){return document.getElementById(id);}
-function render(){document.getElementById("app").innerHTML=(!profile?onboarding():topbar()+'<div class="wrap">'+viewBody()+'</div>');}
+function render(){
+  var app=document.getElementById("app");
+  if(!SB){app.innerHTML=(!profile?onboarding():topbar()+'<div class="wrap">'+viewBody()+'</div>');return;}
+  if(booting){app.innerHTML=loadingScreen();return;}
+  if(!authUser){app.innerHTML=authScreen();return;}
+  if(!profile){app.innerHTML=loadingScreen();return;}
+  app.innerHTML=topbar()+'<div class="wrap">'+viewBody()+'</div>';
+}
 function go(v){state.view=v;render();}
 function openExam(c){state.examCode=c;state.view="examHome";render();}
 
@@ -622,7 +628,8 @@ function topbar(){
   return '<div class="nav"><div class="navin">'+
     '<div class="row gap" style="cursor:pointer" onclick="go(\'home\')"><div style="width:34px;height:34px;border-radius:9px;background:var(--ce);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800" class="ttl">S</div><span class="ttl" style="font-size:21px">Simulado SAP</span></div>'+
     '<div class="row" style="gap:4px">'+n("home","Início")+rel+n("admin","Admin")+
-    '<span class="row gap" style="margin-left:8px;padding:6px 12px;border-radius:999px;background:var(--ow);font-size:13px;font-weight:600"><span style="color:var(--rx)">●</span>'+esc(profile.name)+'</span></div>'+
+    '<span class="row gap" style="margin-left:8px;padding:6px 12px;border-radius:999px;background:var(--ow);font-size:13px;font-weight:600" title="'+esc(profile.email||"")+'"><span style="color:var(--rx)">●</span>'+esc(profile.name)+'</span>'+
+    (SB&&authUser?'<span id="syncDot" class="small muted" style="margin-left:8px" title="Status de sincronização">'+syncLabel()+'</span><button class="navbtn" style="color:var(--err)" title="Sair da conta" onclick="signOut()">Sair</button>':'')+'</div>'+
     '</div></div>';
 }
 
@@ -843,7 +850,7 @@ function adminV(){
      '<label class="btn btn-ghost" style="cursor:pointer">Importar (JSON)<input type="file" accept="application/json" style="display:none" onchange="importExam(this)"></label></div>'+
      (state.adminMsg?'<p class="small" style="margin-bottom:0;color:'+(state.adminMsg.indexOf("Erro")===0?"var(--err)":"var(--mg)")+'">'+esc(state.adminMsg)+'</p>':"")+
    '</div>'+
-   '<p class="small muted">Observação: certificações adicionadas aqui ficam salvas neste navegador. Para que apareçam para todos os colegas de forma permanente, exporte o JSON e me envie para incluir no app publicado, ou migre para um backend compartilhado (Supabase).</p>';
+   '<p class="small muted">Observação: certificações adicionadas aqui ficam salvas na sua conta (sincronizadas na nuvem) e aparecem em qualquer dispositivo onde você entrar. Para que apareçam para todos os colegas de forma permanente, exporte o JSON e me envie para incluir no app publicado.</p>';
 }
 function unlockAdmin(){var v=($("admPass").value||"");if(v===ADMIN_PASS){adminUnlocked=true;state.adminMsg="";}else{state.adminMsg="Senha incorreta.";}render();}
 function parseDump(text){
@@ -867,17 +874,151 @@ function addFromDump(){
   var qs=parseDump(dump);
   if(qs.length<1){state.adminMsg="Erro: nenhuma questão reconhecida. Verifique o formato (NO.x / A. / Answer:).";return render();}
   var exam={code:code,title:title,subtitle:qs.length+" questões (importado)",cats:{geral:{label:"Geral",color:"#009994"}},questions:qs};
-  var cs=customExams();cs.push(exam);jset(CUSTOM_K,cs);
+  var cs=customExams();cs.push(exam);jset(CUSTOM_K,cs);cloudSync();
   state.adminMsg=qs.length+" questões importadas com sucesso em "+title+".";render();
 }
 function deleteExam(code){if(!confirm("Excluir esta certificação e seu histórico?"))return;jset(CUSTOM_K,customExams().filter(function(e){return e.code!==code;}));clearSessions(code);state.adminMsg="Certificação removida.";render();}
 function exportExam(code){var ex=getExam(code);download(code+".json",JSON.stringify({code:ex.code,title:ex.title,subtitle:ex.subtitle,cats:ex.cats,questions:ex.questions},null,2));}
-function importExam(input){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o.code||!o.title||!Array.isArray(o.questions))throw 0;o.questions.forEach(function(q){if(!q.q||!q.o||!Array.isArray(q.a))throw 0;q.cat=q.cat||"geral";});if(!o.cats)o.cats={geral:{label:"Geral",color:"#009994"}};if(getExam(o.code)){state.adminMsg="Erro: código já existe.";return render();}var cs=customExams();cs.push(o);jset(CUSTOM_K,cs);state.adminMsg="Certificação "+o.title+" importada ("+o.questions.length+" questões).";render();}catch(e){state.adminMsg="Erro: arquivo JSON inválido.";render();}};r.readAsText(f);}
+function importExam(input){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o.code||!o.title||!Array.isArray(o.questions))throw 0;o.questions.forEach(function(q){if(!q.q||!q.o||!Array.isArray(q.a))throw 0;q.cat=q.cat||"geral";});if(!o.cats)o.cats={geral:{label:"Geral",color:"#009994"}};if(getExam(o.code)){state.adminMsg="Erro: código já existe.";return render();}var cs=customExams();cs.push(o);jset(CUSTOM_K,cs);cloudSync();state.adminMsg="Certificação "+o.title+" importada ("+o.questions.length+" questões).";render();}catch(e){state.adminMsg="Erro: arquivo JSON inválido.";render();}};r.readAsText(f);}
 
 function download(name,text){var b=new Blob([text],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
 
-render();
+/* ============ Contas e sincronização na nuvem (Supabase) ============ */
+var SUPABASE_URL="https://adpxzacopvgziypcaanw.supabase.co";
+var SUPABASE_KEY="sb_publishable_g79OhwRozRG3c4_9-blSBw_W1PPrsA1";
+var SB=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+var authUser=null,booting=true,loadedFor=null;
+var authMode="signin",authMsg="",authMsgType="",authEmail="",authBusy=false;
+var syncState="idle",pushTimer=null;
 
+function loadingScreen(){
+  return '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px">'+
+    '<div class="ttl" style="width:46px;height:46px;border-radius:12px;background:var(--ce);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">S</div>'+
+    '<p class="muted small" style="margin:0">Carregando…</p></div>';
+}
+
+/* ---- tela de login / cadastro ---- */
+function authScreen(){
+  var s=authMode==="signup";
+  var tab=function(m,lab){var on=authMode===m;return '<button class="btn" style="flex:1;'+(on?"background:#fff;color:var(--gf);box-shadow:0 1px 2px rgba(77,77,77,.12)":"background:transparent;color:var(--mut)")+'" onclick="setAuthMode(\''+m+'\')">'+lab+'</button>';};
+  return '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">'+
+   '<div class="card soft" style="max-width:440px;width:100%;padding:32px">'+
+   '<div class="ttl" style="width:44px;height:44px;border-radius:12px;background:var(--ce);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin-bottom:16px">S</div>'+
+   '<h1 class="ttl" style="font-size:30px;margin:0 0 6px">Simulado SAP</h1>'+
+   '<p class="muted" style="margin:0 0 20px;font-size:14px">'+(s?"Crie sua conta para salvar seu progresso na nuvem e acessá-lo de qualquer dispositivo.":"Entre para retomar seu progresso em qualquer dispositivo.")+'</p>'+
+   '<div class="row" style="gap:6px;margin-bottom:18px;background:var(--ow);padding:4px;border-radius:12px">'+tab("signin","Entrar")+tab("signup","Criar conta")+'</div>'+
+   (s?'<label class="small" style="font-weight:600">Seu nome</label><input id="auName" class="in" style="width:100%;margin:6px 0 12px" placeholder="Ex.: Diego">':'')+
+   '<label class="small" style="font-weight:600">E-mail</label>'+
+   '<input id="auEmail" class="in" type="email" autocomplete="email" style="width:100%;margin:6px 0 12px" placeholder="voce@email.com" value="'+esc(authEmail)+'">'+
+   '<label class="small" style="font-weight:600">Senha</label>'+
+   '<input id="auPass" class="in" type="password" autocomplete="'+(s?"new-password":"current-password")+'" style="width:100%;margin:6px 0 16px" placeholder="'+(s?"Mínimo 6 caracteres":"Sua senha")+'" onkeydown="if(event.key===\'Enter\')submitAuth()">'+
+   '<button class="btn btn-pri" style="width:100%" '+(authBusy?"disabled":"")+' onclick="submitAuth()">'+(authBusy?"Aguarde…":(s?"Criar conta":"Entrar"))+'</button>'+
+   (authMsg?'<p class="small" style="margin:14px 0 0;color:'+(authMsgType==="err"?"var(--err)":"var(--mg)")+'">'+esc(authMsg)+'</p>':'')+
+   '</div></div>';
+}
+function setAuthMode(m){authMode=m;authMsg="";render();setTimeout(function(){var el=document.getElementById(m==="signup"?"auName":"auEmail");if(el)el.focus();},0);}
+function authErrMsg(e){
+  var m=(e&&e.message)||"Erro inesperado.";
+  if(/Invalid login credentials/i.test(m))return "E-mail ou senha incorretos.";
+  if(/already registered|already been registered|User already registered/i.test(m))return "Este e-mail já está cadastrado. Use \"Entrar\".";
+  if(/Email not confirmed/i.test(m))return "Confirme seu e-mail antes de entrar (verifique sua caixa de entrada).";
+  if(/Password should be at least/i.test(m))return "A senha deve ter pelo menos 6 caracteres.";
+  if(/rate limit|too many requests/i.test(m))return "Muitas tentativas. Aguarde um momento e tente novamente.";
+  if(/Unable to validate email|valid email/i.test(m))return "Informe um e-mail válido.";
+  return m;
+}
+function submitAuth(){
+  if(!SB)return;
+  var email=((document.getElementById("auEmail")||{}).value||"").trim();
+  var pass=((document.getElementById("auPass")||{}).value||"");
+  authEmail=email;
+  if(!email||!pass){authMsg="Informe e-mail e senha.";authMsgType="err";return render();}
+  if(authMode==="signup"){
+    if(pass.length<6){authMsg="A senha deve ter pelo menos 6 caracteres.";authMsgType="err";return render();}
+    var name=((document.getElementById("auName")||{}).value||"").trim();
+    authBusy=true;authMsg="";render();
+    SB.auth.signUp({email:email,password:pass,options:{data:{display_name:name||email.split("@")[0]}}}).then(function(res){
+      authBusy=false;
+      if(res.error){authMsg=authErrMsg(res.error);authMsgType="err";return render();}
+      if(res.data&&res.data.session){authEmail="";booting=true;render();}
+      else{authMode="signin";authMsg="Conta criada! Verifique seu e-mail para confirmar o cadastro e depois faça login.";authMsgType="ok";render();}
+    },function(){authBusy=false;authMsg="Erro de conexão. Tente novamente.";authMsgType="err";render();});
+  }else{
+    authBusy=true;authMsg="";render();
+    SB.auth.signInWithPassword({email:email,password:pass}).then(function(res){
+      authBusy=false;
+      if(res.error){authMsg=authErrMsg(res.error);authMsgType="err";return render();}
+      authEmail="";booting=true;render();
+    },function(){authBusy=false;authMsg="Erro de conexão. Tente novamente.";authMsgType="err";render();});
+  }
+}
+function signOut(){
+  if(!SB)return;
+  clearLocalUserData();
+  SB.auth.signOut().then(function(){},function(){});
+}
+function clearLocalUserData(){lsDel(SESS_K);lsDel(CUSTOM_K);lsDel(PROFILE_K);}
+
+/* ---- sincronização ---- */
+function syncLabel(){return syncState==="saving"?"Salvando…":syncState==="err"?"Sem sincronizar":"Sincronizado";}
+function setSync(s){syncState=s;var el=document.getElementById("syncDot");if(el){el.textContent=syncLabel();el.style.color=(s==="err"?"var(--err)":s==="saving"?"var(--am)":"var(--mut)");}}
+function cloudSync(){
+  if(!SB||!authUser)return;
+  setSync("saving");
+  if(pushTimer)clearTimeout(pushTimer);
+  pushTimer=setTimeout(function(){cloudPush();},700);
+}
+function cloudPush(){
+  if(!SB||!authUser)return Promise.resolve();
+  var payload={user_id:authUser.id,display_name:profile?profile.name:null,
+    data:{sessions:jget(SESS_K,{}),customExams:jget(CUSTOM_K,[]),name:profile?profile.name:null,createdAt:profile?profile.createdAt:null}};
+  return SB.from("user_progress").upsert(payload,{onConflict:"user_id"}).then(function(res){
+    setSync(res&&res.error?"err":"ok");
+  },function(){setSync("err");});
+}
+function cloudPull(user){
+  return SB.from("user_progress").select("data,display_name").eq("user_id",user.id).maybeSingle().then(function(res){
+    var row=res&&res.data;
+    var defName=(user.user_metadata&&user.user_metadata.display_name)||(user.email||"").split("@")[0]||"Você";
+    if(row&&row.data&&(row.data.sessions||row.data.customExams)){
+      jset(SESS_K,row.data.sessions||{});
+      jset(CUSTOM_K,row.data.customExams||[]);
+      profile={name:row.display_name||row.data.name||defName,email:user.email,createdAt:row.data.createdAt||new Date().toISOString()};
+      jset(PROFILE_K,profile);syncState="ok";
+      return;
+    }
+    /* sem dados na nuvem: cria a linha do usuário, migrando o que houver salvo localmente */
+    profile={name:defName,email:user.email,createdAt:new Date().toISOString()};
+    jset(PROFILE_K,profile);
+    return cloudPush();
+  },function(){
+    /* erro de rede: usa o cache local, se houver */
+    var defName=(user.email||"").split("@")[0]||"Você";
+    profile=jget(PROFILE_K,null)||{name:defName,email:user.email,createdAt:new Date().toISOString()};
+    profile.email=user.email;syncState="err";
+  });
+}
+function onLogin(user){
+  authUser=user;
+  if(loadedFor===user.id){booting=false;return render();}
+  loadedFor=user.id;
+  state={view:"home",examCode:null,cfg:null,lastResult:null,adminMsg:""};
+  cloudPull(user).then(function(){booting=false;render();});
+}
+function boot(){
+  if(!SB){booting=false;return render();}
+  SB.auth.onAuthStateChange(function(evt,session){
+    if(session&&session.user){
+      var u=session.user;
+      setTimeout(function(){onLogin(u);},0);
+    }else{
+      authUser=null;profile=null;loadedFor=null;booting=false;adminUnlocked=false;
+      state={view:"home",examCode:null,cfg:null,lastResult:null,adminMsg:""};
+      render();
+    }
+  });
+}
+boot();
 </script>
 </body>
 </html>
