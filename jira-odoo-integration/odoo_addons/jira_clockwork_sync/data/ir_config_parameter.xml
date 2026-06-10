@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Data limite de competência fechada (YYYY-MM-DD); vazio = nenhum
+         período fechado. Pode ser mantida via CLI do serviço
+         (jira-odoo-sync close-period - -until 2026-05-31) ou em
+         Configurações > Técnico > Parâmetros do Sistema. -->
+    <record id="param_closed_until" model="ir.config_parameter">
+        <field name="key">jira_clockwork_sync.closed_until</field>
+        <field name="value"></field>
+    </record>
+
+    <!-- Atualizado pelo serviço a cada execução bem-sucedida. -->
+    <record id="param_last_sync_at" model="ir.config_parameter">
+        <field name="key">jira_clockwork_sync.last_sync_at</field>
+        <field name="value"></field>
+    </record>
+</odoo>
