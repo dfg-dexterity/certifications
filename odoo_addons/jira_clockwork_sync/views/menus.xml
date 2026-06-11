@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_jira_root"
+              name="Integração Jira"
+              groups="group_jira_integration_user"
+              sequence="80"/>
+
+    <menuitem id="menu_jira_monitoring"
+              name="Monitoramento"
+              parent="menu_jira_root"
+              sequence="10"/>
+    <menuitem id="menu_jira_sync_errors"
+              action="action_jira_sync_errors"
+              parent="menu_jira_monitoring"
+              sequence="10"/>
+    <menuitem id="menu_jira_sync_log"
+              action="action_jira_sync_log"
+              parent="menu_jira_monitoring"
+              sequence="20"/>
+    <menuitem id="menu_jira_timesheets"
+              action="action_jira_timesheets"
+              parent="menu_jira_monitoring"
+              sequence="30"/>
+    <menuitem id="menu_jira_tasks"
+              action="action_jira_tasks"
+              parent="menu_jira_monitoring"
+              sequence="40"/>
+
+    <menuitem id="menu_jira_mappings"
+              name="De-Para"
+              parent="menu_jira_root"
+              sequence="20"/>
+    <menuitem id="menu_jira_user_mapping"
+              action="action_jira_user_mapping"
+              parent="menu_jira_mappings"
+              sequence="10"/>
+    <menuitem id="menu_jira_project_mapping"
+              action="action_jira_project_mapping"
+              parent="menu_jira_mappings"
+              sequence="20"/>
+    <menuitem id="menu_jira_field_allocation"
+              action="action_jira_field_allocation"
+              parent="menu_jira_mappings"
+              sequence="30"/>
+</odoo>

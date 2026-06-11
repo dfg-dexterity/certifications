@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tela 11.3: visão consolidada das alocações por campo -->
+    <record id="view_jira_field_allocation_tree" model="ir.ui.view">
+        <field name="name">jira.integration.field.allocation.tree</field>
+        <field name="model">jira.integration.field.allocation</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="jira_project_key"/>
+                <field name="jira_field_name"/>
+                <field name="jira_field_id" optional="hide"/>
+                <field name="jira_field_value"/>
+                <field name="odoo_project_id"/>
+                <field name="odoo_analytic_account_id"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_jira_field_allocation_form" model="ir.ui.view">
+        <field name="name">jira.integration.field.allocation.form</field>
+        <field name="model">jira.integration.field.allocation</field>
+        <field name="arch" type="xml">
+            <form string="Alocação por Campo">
+                <sheet>
+                    <group>
+                        <group string="Regra (Jira)">
+                            <field name="project_mapping_id"/>
+                            <field name="jira_field_name"/>
+                            <field name="jira_field_id"/>
+                            <field name="jira_field_value"/>
+                        </group>
+                        <group string="Destino (Odoo)">
+                            <field name="odoo_project_id"/>
+                            <field name="odoo_analytic_account_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_jira_field_allocation_search" model="ir.ui.view">
+        <field name="name">jira.integration.field.allocation.search</field>
+        <field name="model">jira.integration.field.allocation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="jira_project_key"/>
+                <field name="jira_field_value"/>
+                <field name="odoo_analytic_account_id"/>
+                <filter string="Arquivados" name="inactive"
+                        domain="[('active', '=', False)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Projeto Jira" name="group_project"
+                            context="{'group_by': 'jira_project_key'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_jira_field_allocation" model="ir.actions.act_window">
+        <field name="name">Alocação por Campo</field>
+        <field name="res_model">jira.integration.field.allocation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_group_project': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Mapeie cada valor do campo de decisão para uma conta analítica</p>
+            <p>Exemplo: projeto TAD + Departamento = TRM aloca na conta
+            analítica "Dexterity / TRM". Sem combinação cadastrada, o
+            apontamento NÃO integra e vira pendência na tela de erros.</p>
+        </field>
+    </record>
+</odoo>

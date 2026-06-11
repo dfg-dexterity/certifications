@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_jira_user_mapping_user,jira.integration.user.mapping user,model_jira_integration_user_mapping,group_jira_integration_user,1,0,0,0
+access_jira_user_mapping_manager,jira.integration.user.mapping manager,model_jira_integration_user_mapping,group_jira_integration_manager,1,1,1,1
+access_jira_project_mapping_user,jira.integration.project.mapping user,model_jira_integration_project_mapping,group_jira_integration_user,1,0,0,0
+access_jira_project_mapping_manager,jira.integration.project.mapping manager,model_jira_integration_project_mapping,group_jira_integration_manager,1,1,1,1
+access_jira_field_allocation_user,jira.integration.field.allocation user,model_jira_integration_field_allocation,group_jira_integration_user,1,0,0,0
+access_jira_field_allocation_manager,jira.integration.field.allocation manager,model_jira_integration_field_allocation,group_jira_integration_manager,1,1,1,1
+access_jira_sync_log_user,jira.integration.sync.log user,model_jira_integration_sync_log,group_jira_integration_user,1,0,0,0
+access_jira_sync_log_manager,jira.integration.sync.log manager,model_jira_integration_sync_log,group_jira_integration_manager,1,1,1,1

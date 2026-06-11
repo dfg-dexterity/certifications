@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependências
+        run: pip install -r requirements.txt pytest
+      - name: Rodar testes
+        run: python -m pytest -v
+      - name: Validar XML do addon Odoo
+        run: |
+          python - <<'EOF'
+          import glob
+          import xml.etree.ElementTree as ET
+          files = glob.glob("odoo_addons/**/*.xml", recursive=True)
+          assert files, "Nenhum XML encontrado"
+          for path in files:
+              ET.parse(path)
+              print(f"OK {path}")
+          EOF
