@@ -1,15 +1,17 @@
 """Cliente Odoo via XML-RPC (External API).
 
 Responsável por:
-* Carregar os de-paras mantidos no addon ``jira_clockwork_sync``.
+* Carregar os de-paras (addon ``jira_clockwork_sync`` em Odoo.sh/on-premise,
+  ou modelos Studio/customizados em Odoo Online — ver ``schema.py``).
 * Criar/atualizar tarefas (``project.task``) e timesheets
   (``account.analytic.line``) com os campos técnicos ``x_*``.
-* Registrar o log de integração (``jira.integration.sync.log``).
+* Registrar o log de integração.
 * Ler/gravar parâmetros (última sincronização, competência fechada).
 
 O usuário de API no Odoo precisa de acesso de escrita a projetos,
-timesheets e aos modelos do addon (grupo "Integração Jira / Gestor"),
-além de leitura/escrita em ``ir.config_parameter`` (grupo Configurações).
+timesheets e aos modelos de de-para, além de leitura/escrita em
+``ir.config_parameter``. Em Odoo Online, a External API exige o plano
+Custom.
 """
 from __future__ import annotations
 
@@ -21,6 +23,14 @@ from ..models import (
     FieldAllocation,
     ProjectMapping,
     UserMapping,
+)
+from ..schema import (
+    ADDON_SCHEMA,
+    ModelSchema,
+    OdooSchema,
+    translate_domain,
+    translate_row,
+    translate_vals,
 )
 
 PARAM_LAST_SYNC = "jira_clockwork_sync.last_sync_at"
@@ -55,11 +65,19 @@ def odoo_datetime(value: datetime) -> str:
 
 
 class OdooClient:
-    def __init__(self, url: str, db: str, username: str, password: str):
+    def __init__(
+        self,
+        url: str,
+        db: str,
+        username: str,
+        password: str,
+        schema: OdooSchema = ADDON_SCHEMA,
+    ):
         self.url = url.rstrip("/")
         self.db = db
         self.username = username
         self.password = password
+        self.schema = schema
         self._uid: int | None = None
         self._common = xmlrpc.client.ServerProxy(
             f"{self.url}/xmlrpc/2/common", allow_none=True
@@ -102,10 +120,37 @@ class OdooClient:
             kwargs["limit"] = limit
         return self.execute(model, "search_read", [domain], kwargs)
 
+    # ------------------------------------------- helpers com tradução de esquema
+    def _sr(
+        self,
+        ms: ModelSchema,
+        domain: list,
+        fields: list[str],
+        limit: int | None = None,
+        active_test: bool | None = None,
+    ) -> list[dict]:
+        """search_read com nomes lógicos; traduz ida e volta."""
+        kwargs: dict = {"fields": [ms.tech(name) for name in fields]}
+        if limit:
+            kwargs["limit"] = limit
+        if active_test is not None:
+            kwargs["context"] = {"active_test": active_test}
+        rows = self.execute(ms.model, "search_read", [translate_domain(ms, domain)], kwargs)
+        return [translate_row(ms, row) for row in rows]
+
+    def _create(self, ms: ModelSchema, vals: dict, display_name: str = "") -> int:
+        tech_vals = translate_vals(ms, vals)
+        if ms.name_field and ms.name_field not in tech_vals:
+            tech_vals[ms.name_field] = display_name or "/"
+        return self.execute(ms.model, "create", [tech_vals])
+
+    def _write(self, ms: ModelSchema, ids: list[int], vals: dict) -> None:
+        self.execute(ms.model, "write", [ids, translate_vals(ms, vals)])
+
     # ------------------------------------------------------------- de-paras
     def load_user_mappings(self) -> dict[str, UserMapping]:
-        rows = self.search_read(
-            "jira.integration.user.mapping",
+        rows = self._sr(
+            self.schema.user_mapping,
             [["active", "=", True]],
             [
                 "jira_account_id",
@@ -133,22 +178,19 @@ class OdooClient:
     def load_project_mappings(self) -> dict[str, ProjectMapping]:
         # Inclui inativos: o motor de alocação precisa diferenciar
         # "sem de-para" (erro) de "de-para inativo" (ignorar, Regra 1).
-        rows = self.execute(
-            "jira.integration.project.mapping",
-            "search_read",
-            [[]],
-            {
-                "fields": [
-                    "jira_project_key",
-                    "allocation_mode",
-                    "odoo_project_id",
-                    "odoo_analytic_account_id",
-                    "decision_field_id",
-                    "decision_field_name",
-                    "active",
-                ],
-                "context": {"active_test": False},
-            },
+        rows = self._sr(
+            self.schema.project_mapping,
+            [],
+            [
+                "jira_project_key",
+                "allocation_mode",
+                "odoo_project_id",
+                "odoo_analytic_account_id",
+                "decision_field_id",
+                "decision_field_name",
+                "active",
+            ],
+            active_test=False,
         )
         mappings: dict[str, ProjectMapping] = {}
         for row in rows:
@@ -168,8 +210,8 @@ class OdooClient:
         return mappings
 
     def load_field_allocations(self) -> dict[str, dict[str, FieldAllocation]]:
-        rows = self.search_read(
-            "jira.integration.field.allocation",
+        rows = self._sr(
+            self.schema.field_allocation,
             [["active", "=", True]],
             [
                 "jira_project_key",
@@ -206,15 +248,13 @@ class OdooClient:
         A linha nasce SEM funcionário Odoo: aparece na tela de manutenção
         no filtro "Sem vínculo" para o gestor completar (seção 11.1).
         """
-        rows = self.execute(
-            "jira.integration.user.mapping",
-            "search_read",
-            [[["jira_account_id", "=", jira_account_id]]],
-            {
-                "fields": ["id", "jira_display_name", "jira_email"],
-                "limit": 1,
-                "context": {"active_test": False},
-            },
+        ms = self.schema.user_mapping
+        rows = self._sr(
+            ms,
+            [["jira_account_id", "=", jira_account_id]],
+            ["jira_display_name", "jira_email"],
+            limit=1,
+            active_test=False,
         )
         if rows:
             row = rows[0]
@@ -224,37 +264,34 @@ class OdooClient:
             if email and not row.get("jira_email"):
                 updates["jira_email"] = email
             if updates:
-                self.execute(
-                    "jira.integration.user.mapping", "write", [[row["id"]], updates]
-                )
+                self._write(ms, [row["id"]], updates)
             return row["id"]
-        return self.execute(
-            "jira.integration.user.mapping",
-            "create",
-            [
-                {
-                    "jira_account_id": jira_account_id,
-                    "jira_display_name": display_name,
-                    "jira_email": email,
-                    "clockwork_user_id": clockwork_user_id,
-                }
-            ],
+        return self._create(
+            ms,
+            {
+                "jira_account_id": jira_account_id,
+                "jira_display_name": display_name,
+                "jira_email": email,
+                "clockwork_user_id": clockwork_user_id,
+                "active": True,
+            },
+            display_name=display_name or jira_account_id,
         )
 
     def touch_user_last_worklog(self, mapping_ids: list[int], when: datetime) -> None:
         if mapping_ids:
-            self.execute(
-                "jira.integration.user.mapping",
-                "write",
-                [mapping_ids, {"last_worklog_at": odoo_datetime(when)}],
+            self._write(
+                self.schema.user_mapping,
+                mapping_ids,
+                {"last_worklog_at": odoo_datetime(when)},
             )
 
     def touch_project_last_sync(self, mapping_ids: list[int], when: datetime) -> None:
         if mapping_ids:
-            self.execute(
-                "jira.integration.project.mapping",
-                "write",
-                [mapping_ids, {"last_sync_at": odoo_datetime(when)}],
+            self._write(
+                self.schema.project_mapping,
+                mapping_ids,
+                {"last_sync_at": odoo_datetime(when)},
             )
 
     # -------------------------------------------------------------- parâmetros
@@ -375,38 +412,39 @@ class OdooClient:
 
     # --------------------------------------------------------------------- log
     def create_sync_log(self, vals: dict) -> int:
-        return self.execute("jira.integration.sync.log", "create", [vals])
+        display = str(vals.get("worklog_id") or vals.get("jira_issue_key") or "log")
+        return self._create(self.schema.sync_log, vals, display_name=display)
 
     def resolve_error_logs(self, worklog_id: str, when: datetime) -> None:
         """Após sucesso, fecha pendências antigas do mesmo worklog."""
+        ms = self.schema.sync_log
         ids = self.execute(
-            "jira.integration.sync.log",
+            ms.model,
             "search",
             [
-                [
-                    ["worklog_id", "=", str(worklog_id)],
-                    ["status", "in", _ERROR_LIKE_STATUSES],
-                ]
+                translate_domain(
+                    ms,
+                    [
+                        ["worklog_id", "=", str(worklog_id)],
+                        ["status", "in", _ERROR_LIKE_STATUSES],
+                    ],
+                )
             ],
         )
         if ids:
-            self.execute(
-                "jira.integration.sync.log",
-                "write",
-                [
-                    ids,
-                    {
-                        "status": "success",
-                        "message": "Reprocessado com sucesso em "
-                        + odoo_datetime(when),
-                    },
-                ],
+            self._write(
+                ms,
+                ids,
+                {
+                    "status": "success",
+                    "message": "Reprocessado com sucesso em " + odoo_datetime(when),
+                },
             )
 
     def fetch_pending_logs(self) -> list[dict]:
         """Linhas marcadas para reprocesso na tela de erros (status PENDING)."""
-        rows = self.search_read(
-            "jira.integration.sync.log",
+        rows = self._sr(
+            self.schema.sync_log,
             [["status", "=", "pending"], ["worklog_id", "!=", False]],
             ["worklog_id", "worklog_date"],
         )

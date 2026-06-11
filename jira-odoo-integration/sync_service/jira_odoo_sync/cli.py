@@ -35,6 +35,7 @@ from .clients import ClockworkClient, JiraClient, OdooClient
 from .clients.odoo import PARAM_CLOSED_UNTIL
 from .config import Settings
 from .processor import SyncProcessor
+from .schema import get_schema
 
 logger = logging.getLogger("jira_odoo_sync")
 
@@ -103,7 +104,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _build(settings: Settings):
     odoo = OdooClient(
-        settings.odoo_url, settings.odoo_db, settings.odoo_username, settings.odoo_password
+        settings.odoo_url,
+        settings.odoo_db,
+        settings.odoo_username,
+        settings.odoo_password,
+        schema=get_schema(settings.odoo_schema),
     )
     jira = JiraClient(settings.jira_base_url, settings.jira_email, settings.jira_api_token)
     clockwork = ClockworkClient(

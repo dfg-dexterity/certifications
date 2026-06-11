@@ -46,6 +46,10 @@ class Settings:
     odoo_db: str
     odoo_username: str
     odoo_password: str
+    # "addon" (Odoo.sh/on-premise com o addon jira_clockwork_sync) ou
+    # "studio" (Odoo Online com modelos criados via Studio — ver
+    # docs/odoo-online-studio.md)
+    odoo_schema: str = "addon"
     # Comportamento
     sync_lookback_days: int = 7
     clockwork_chunk_days: int = 7
@@ -67,6 +71,7 @@ class Settings:
             odoo_db=_required("ODOO_DB"),
             odoo_username=_required("ODOO_USERNAME"),
             odoo_password=_required("ODOO_PASSWORD"),
+            odoo_schema=_optional("ODOO_SCHEMA", "addon").lower(),
             sync_lookback_days=_as_int("SYNC_LOOKBACK_DAYS", 7),
             clockwork_chunk_days=_as_int("CLOCKWORK_CHUNK_DAYS", 7),
             log_success=_as_bool("SYNC_LOG_SUCCESS", False),

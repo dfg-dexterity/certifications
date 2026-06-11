@@ -86,7 +86,14 @@ Jira Project = TAD  +  Departamento = (vazio)        → ERRO: campo obrigatóri
 
 ## Instalação
 
-### 1. Addon Odoo
+> **Odoo Online (SaaS `*.odoo.com`)?** Addons customizados não podem ser
+> instalados no Online. Nesse caso, **pule a etapa do addon**: crie os
+> modelos/campos via Studio seguindo
+> [`docs/odoo-online-studio.md`](docs/odoo-online-studio.md) e configure o
+> serviço com `ODOO_SCHEMA=studio`. A External API (XML-RPC) e o Studio
+> exigem o plano Custom do Odoo Online.
+
+### 1. Addon Odoo (somente Odoo.sh / on-premise)
 
 1. Copie `odoo_addons/jira_clockwork_sync` para o caminho de addons do Odoo
    (alvo: Odoo 17; para 16 é necessário converter os atributos

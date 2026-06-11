@@ -9,7 +9,8 @@ Guia de operação do dia a dia. Para o desenho completo, ver
 |---|---|
 | Jira Cloud | Conta de serviço com acesso de leitura aos projetos integrados + API token |
 | Clockwork **Pro** | Token de API (a API de worklogs é recurso da versão Pro) |
-| Odoo | Addon `jira_clockwork_sync` instalado + usuário de serviço no grupo "Integração Jira / Gestor" com acesso a Projetos, Timesheets e Configurações |
+| Odoo (Odoo.sh/on-premise) | Addon `jira_clockwork_sync` instalado + usuário de serviço no grupo "Integração Jira / Gestor" com acesso a Projetos, Timesheets e Configurações |
+| Odoo (**Online**) | Plano Custom (External API + Studio); modelos/campos criados conforme [`odoo-online-studio.md`](odoo-online-studio.md); `ODOO_SCHEMA=studio` no `.env`; usuário da chave de API com acesso aos 4 modelos, Projetos, Timesheets e Configurações |
 
 Credenciais ficam **somente** no `.env` (ou no cofre de segredos do
 orquestrador). Nunca em código nem no repositório (RNF02).
