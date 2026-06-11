@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tela 11.4: erros de integração / log -->
+    <record id="view_jira_sync_log_tree" model="ir.ui.view">
+        <field name="name">jira.integration.sync.log.tree</field>
+        <field name="model">jira.integration.sync.log</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="status in ('error_user_mapping', 'error_project_mapping', 'error_analytic_mapping', 'error_odoo', 'error_jira')"
+                  decoration-warning="status in ('closed_period', 'pending')"
+                  decoration-muted="status in ('skipped', 'cancelled_source')"
+                  create="false">
+                <field name="create_date" string="Data do erro"/>
+                <field name="status"/>
+                <field name="jira_issue_key"/>
+                <field name="worklog_id"/>
+                <field name="jira_display_name"/>
+                <field name="jira_project_key"/>
+                <field name="field_value" optional="show"/>
+                <field name="worklog_date" optional="show"/>
+                <field name="hours" optional="show"/>
+                <field name="message"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_jira_sync_log_form" model="ir.ui.view">
+        <field name="name">jira.integration.sync.log.form</field>
+        <field name="model">jira.integration.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Registro de Integração" create="false">
+                <header>
+                    <button name="action_mark_pending" type="object"
+                            string="Reprocessar" class="btn-primary"
+                            invisible="status in ('success', 'pending')"
+                            groups="jira_clockwork_sync.group_jira_integration_manager"
+                            help="Marca como PENDING; o serviço reprocessa na próxima execução de 'reprocess - -from-pending'"/>
+                    <button name="action_ignore" type="object" string="Ignorar"
+                            invisible="status in ('success', 'skipped')"
+                            groups="jira_clockwork_sync.group_jira_integration_manager"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Apontamento">
+                            <field name="worklog_id"/>
+                            <field name="worklog_date"/>
+                            <field name="hours"/>
+                            <field name="jira_display_name"/>
+                            <field name="jira_account_id"/>
+                        </group>
+                        <group string="Issue / Projeto">
+                            <field name="jira_issue_key"/>
+                            <field name="jira_issue_id"/>
+                            <field name="jira_project_key"/>
+                            <field name="field_value"/>
+                        </group>
+                    </group>
+                    <group string="Mensagem">
+                        <field name="message" nolabel="1"/>
+                    </group>
+                    <group>
+                        <group string="Vínculos no Odoo">
+                            <field name="task_id"/>
+                            <field name="timesheet_id"/>
+                        </group>
+                    </group>
+                    <group string="Payload (debug)" groups="base.group_no_one">
+                        <field name="payload" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_jira_sync_log_search" model="ir.ui.view">
+        <field name="name">jira.integration.sync.log.search</field>
+        <field name="model">jira.integration.sync.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="jira_issue_key"/>
+                <field name="worklog_id"/>
+                <field name="jira_display_name"/>
+                <field name="jira_project_key"/>
+                <filter string="Erros" name="errors"
+                        domain="[('status', '=like', 'error_%')]"/>
+                <filter string="Competência fechada" name="closed_period"
+                        domain="[('status', '=', 'closed_period')]"/>
+                <filter string="Pendentes de reprocesso" name="pending"
+                        domain="[('status', '=', 'pending')]"/>
+                <filter string="Cancelados na origem" name="cancelled"
+                        domain="[('status', '=', 'cancelled_source')]"/>
+                <separator/>
+                <filter string="Hoje" name="today"
+                        domain="[('create_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Status" name="group_status"
+                            context="{'group_by': 'status'}"/>
+                    <filter string="Projeto Jira" name="group_project"
+                            context="{'group_by': 'jira_project_key'}"/>
+                    <filter string="Usuário" name="group_user"
+                            context="{'group_by': 'jira_display_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_jira_sync_log" model="ir.actions.act_window">
+        <field name="name">Log de Integração</field>
+        <field name="res_model">jira.integration.sync.log</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_jira_sync_errors" model="ir.actions.act_window">
+        <field name="name">Erros de Integração</field>
+        <field name="res_model">jira.integration.sync.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_errors': 1, 'search_default_closed_period': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nenhum erro pendente</p>
+            <p>Corrija o de-para indicado na mensagem, abra o registro e
+            clique em "Reprocessar". A exportação para Excel está disponível
+            pela própria lista (selecionar linhas e exportar).</p>
+        </field>
+    </record>
+</odoo>

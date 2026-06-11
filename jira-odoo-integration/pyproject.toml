@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jira-odoo-sync"
+version = "0.1.0"
+description = "Integração de apontamentos Jira/Clockwork Pro com Odoo"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+dependencies = [
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+jira-odoo-sync = "jira_odoo_sync.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["sync_service"]
+include = ["jira_odoo_sync*"]
+
+[tool.pytest.ini_options]
+testpaths = ["sync_service/tests"]
+pythonpath = ["sync_service", "sync_service/tests"]

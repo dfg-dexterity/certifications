@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Aba "Jira" no formulário da tarefa, visível apenas em tarefas importadas -->
+    <record id="view_task_form_jira" model="ir.ui.view">
+        <field name="name">project.task.form.jira.integration</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Jira" name="jira_integration" invisible="not x_jira_issue_id">
+                    <group>
+                        <group>
+                            <field name="x_jira_issue_key"/>
+                            <field name="x_jira_issue_id"/>
+                            <field name="x_jira_project_key"/>
+                            <field name="x_jira_status"/>
+                        </group>
+                        <group>
+                            <field name="x_jira_issue_url" widget="url"/>
+                            <field name="x_integration_source"/>
+                            <field name="x_last_sync_at"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tarefas importadas do Jira -->
+    <record id="action_jira_tasks" model="ir.actions.act_window">
+        <field name="name">Tarefas Importadas do Jira</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('x_jira_issue_id', '!=', False)]</field>
+    </record>
+</odoo>
