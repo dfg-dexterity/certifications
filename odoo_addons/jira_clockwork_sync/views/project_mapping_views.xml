@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tela 11.2: manutenção do de-para de projetos -->
+    <record id="view_jira_project_mapping_tree" model="ir.ui.view">
+        <field name="name">jira.integration.project.mapping.tree</field>
+        <field name="model">jira.integration.project.mapping</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="jira_project_key"/>
+                <field name="jira_project_name" optional="show"/>
+                <field name="odoo_project_id"/>
+                <field name="odoo_analytic_account_id"/>
+                <field name="allocation_mode"/>
+                <field name="active"/>
+                <field name="last_sync_at"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_jira_project_mapping_form" model="ir.ui.view">
+        <field name="name">jira.integration.project.mapping.form</field>
+        <field name="model">jira.integration.project.mapping</field>
+        <field name="arch" type="xml">
+            <form string="De-Para de Projeto">
+                <sheet>
+                    <widget name="web_ribbon" title="Arquivado" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group string="Origem (Jira)">
+                            <field name="jira_project_key"/>
+                            <field name="jira_project_id"/>
+                            <field name="jira_project_name"/>
+                        </group>
+                        <group string="Destino (Odoo)">
+                            <field name="allocation_mode" widget="radio"/>
+                            <field name="odoo_project_id"
+                                   invisible="allocation_mode == 'ignore'"
+                                   required="allocation_mode in ('direct_project', 'error_if_empty')"/>
+                            <field name="odoo_analytic_account_id"
+                                   invisible="allocation_mode == 'ignore'"
+                                   required="allocation_mode in ('direct_project', 'error_if_empty')"/>
+                        </group>
+                    </group>
+                    <group string="Regra por campo da issue"
+                           invisible="allocation_mode not in ('by_issue_field', 'error_if_empty')">
+                        <field name="decision_field_id"
+                               required="allocation_mode in ('by_issue_field', 'error_if_empty')"/>
+                        <field name="decision_field_name"/>
+                    </group>
+                    <notebook>
+                        <page string="Alocações por valor"
+                              invisible="allocation_mode != 'by_issue_field'">
+                            <field name="field_allocation_ids">
+                                <tree editable="bottom">
+                                    <field name="jira_field_value"/>
+                                    <field name="odoo_project_id"/>
+                                    <field name="odoo_analytic_account_id"/>
+                                    <field name="active"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Integração">
+                            <group>
+                                <field name="active"/>
+                                <field name="last_sync_at"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_jira_project_mapping_search" model="ir.ui.view">
+        <field name="name">jira.integration.project.mapping.search</field>
+        <field name="model">jira.integration.project.mapping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="jira_project_key"/>
+                <field name="odoo_project_id"/>
+                <filter string="Por campo da issue" name="by_field"
+                        domain="[('allocation_mode', '=', 'by_issue_field')]"/>
+                <filter string="Arquivados" name="inactive"
+                        domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_jira_project_mapping" model="ir.actions.act_window">
+        <field name="name">De-Para de Projetos</field>
+        <field name="res_model">jira.integration.project.mapping</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Mapeie cada projeto Jira para um projeto/conta analítica Odoo</p>
+            <p>Projetos especiais (ex.: TAD) usam o modo BY_ISSUE_FIELD: a conta
+            analítica é decidida pelo valor de um campo do ticket, conforme a
+            aba "Alocações por valor".</p>
+        </field>
+    </record>
+</odoo>

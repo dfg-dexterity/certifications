@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_project_form_jira" model="ir.ui.view">
+        <field name="name">project.project.form.jira.integration</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Integração Jira" name="jira_integration">
+                    <group>
+                        <field name="x_jira_project_key"/>
+                        <field name="x_integration_enabled"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

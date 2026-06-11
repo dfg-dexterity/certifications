@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tela 11.1: manutenção do de-para de usuários -->
+    <record id="view_jira_user_mapping_tree" model="ir.ui.view">
+        <field name="name">jira.integration.user.mapping.tree</field>
+        <field name="model">jira.integration.user.mapping</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="not odoo_employee_id">
+                <field name="jira_account_id"/>
+                <field name="jira_display_name"/>
+                <field name="jira_email"/>
+                <field name="clockwork_user_id" optional="hide"/>
+                <field name="odoo_employee_id"/>
+                <field name="odoo_user_id" optional="hide"/>
+                <field name="active"/>
+                <field name="last_worklog_at"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_jira_user_mapping_form" model="ir.ui.view">
+        <field name="name">jira.integration.user.mapping.form</field>
+        <field name="model">jira.integration.user.mapping</field>
+        <field name="arch" type="xml">
+            <form string="De-Para de Usuário">
+                <sheet>
+                    <widget name="web_ribbon" title="Arquivado" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group string="Origem (Jira / Clockwork)">
+                            <field name="jira_account_id"/>
+                            <field name="jira_display_name"/>
+                            <field name="jira_email"/>
+                            <field name="clockwork_user_id"/>
+                        </group>
+                        <group string="Destino (Odoo)">
+                            <field name="odoo_employee_id"/>
+                            <field name="odoo_user_id"/>
+                            <field name="hourly_cost"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Vigência">
+                            <field name="active"/>
+                            <field name="valid_from"/>
+                            <field name="valid_to"/>
+                        </group>
+                        <group string="Integração">
+                            <field name="last_worklog_at"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_jira_user_mapping_search" model="ir.ui.view">
+        <field name="name">jira.integration.user.mapping.search</field>
+        <field name="model">jira.integration.user.mapping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="jira_account_id"/>
+                <field name="jira_display_name"/>
+                <field name="jira_email"/>
+                <field name="odoo_employee_id"/>
+                <filter string="Sem vínculo" name="unmapped"
+                        domain="[('odoo_employee_id', '=', False)]"/>
+                <filter string="Arquivados" name="inactive"
+                        domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_jira_user_mapping" model="ir.actions.act_window">
+        <field name="name">De-Para de Usuários</field>
+        <field name="res_model">jira.integration.user.mapping</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Cadastre o vínculo entre usuários Jira/Clockwork e funcionários Odoo</p>
+            <p>Linhas sem funcionário são criadas automaticamente pelo serviço
+            quando um usuário desconhecido aponta horas. Use o filtro
+            "Sem vínculo" para completá-las.</p>
+        </field>
+    </record>
+</odoo>

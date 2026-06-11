@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_jira_integration" model="ir.module.category">
+        <field name="name">Integração Jira</field>
+        <field name="description">Permissões da integração Jira/Clockwork Pro</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <record id="group_jira_integration_user" model="res.groups">
+        <field name="name">Consulta</field>
+        <field name="category_id" ref="module_category_jira_integration"/>
+        <field name="comment">Visualiza de-paras e log de integração.</field>
+    </record>
+
+    <record id="group_jira_integration_manager" model="res.groups">
+        <field name="name">Gestor</field>
+        <field name="category_id" ref="module_category_jira_integration"/>
+        <field name="implied_ids" eval="[(4, ref('group_jira_integration_user'))]"/>
+        <field name="comment">Mantém de-paras, trata erros e reprocessa apontamentos. O usuário de API do serviço de sincronização deve pertencer a este grupo.</field>
+    </record>
+</odoo>

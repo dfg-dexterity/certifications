@@ -1,0 +1,12 @@
+# Credenciais — nunca versionar (RNF02)
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+dist/
+build/
